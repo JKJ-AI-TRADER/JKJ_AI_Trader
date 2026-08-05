@@ -1,0 +1,5 @@
+APP_NAME = "JKJ AI Trader"
+VERSION = "MVP v0.1"
+MARKET = "NSE"
+CURRENCY = "INR"
+PHILOSOPHY = "Wisdom Before Wealth"
