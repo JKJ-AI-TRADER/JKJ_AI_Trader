@@ -5,7 +5,7 @@ APP_NAME = "JKJ AI Trader"
 
 # Version
 APP_VERSION = "MVP v0.1"
-
+PHILOSOPHY = "Wisdom Before Wealth. Protecting capital through disciplined, explainable decisions."
 # Investment defaults
 DEFAULT_CAPITAL = 50000
 
