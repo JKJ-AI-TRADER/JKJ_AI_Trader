@@ -3,6 +3,7 @@ from datetime import date
 from database import create_database, add_holding, get_portfolio
 from modules.stock_data import get_stock_data
 from modules.risk_guardian import calculate_stock_risk
+from modules.portfolio_engine import calculate_portfolio
 def show():
     # Initialize database
     create_database()
