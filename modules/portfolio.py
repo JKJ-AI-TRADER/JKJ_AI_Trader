@@ -1,98 +1,157 @@
 import streamlit as st
 from datetime import date
-from database import create_database, add_holding, get_portfolio
-from modules.stock_data import get_stock_data
-from modules.risk_guardian import calculate_stock_risk
+
 from modules.portfolio_engine import calculate_portfolio
+from database import (
+    create_database,
+    add_holding,
+    get_portfolio
+)
+
+from modules.stock_data import get_stock_data
+
+
+
 def show():
-    # Initialize database
+
+    # ==========================================
+    # Initialize Database
+    # ==========================================
+
     create_database()
-    
-st.write("")
 
-st.markdown("### Add New Portfolio Holding")
+    st.write("")
 
-col1, col2, col3, col4, col5 = st.columns(5)
+    # ==========================================
+    # Add New Portfolio Holding
+    # ==========================================
 
-with col1:
-    stock_name = st.text_input("Stock")
+    st.markdown("### Add New Portfolio Holding")
 
-with col2:
-    quantity = st.number_input(
-        "Qty",
-        min_value=1,
-        value=1
-    )
+    col1, col2, col3, col4, col5 = st.columns(5)
 
-with col3:
-    buy_price = st.number_input(
-        "Buy Price",
-        min_value=0.0,
-        value=0.0
-    )
+    with col1:
+        stock_name = st.text_input("Stock")
 
-with col4:
-    current_price = st.number_input(
-        "Current Price",
-        min_value=0.0,
-        value=0.0
-    )
+    with col2:
+        quantity = st.number_input(
+            "Qty",
+            min_value=1,
+            value=1
+        )
 
-with col5:
-    buy_date = st.date_input(
-        "Buy Date",
-        date.today()
-    )
+    with col3:
+        buy_price = st.number_input(
+            "Buy Price",
+            min_value=0.0,
+            value=0.0
+        )
+
+    with col4:
+        current_price = st.number_input(
+            "Current Price",
+            min_value=0.0,
+            value=0.0
+        )
+
+    with col5:
+        buy_date = st.date_input(
+            "Buy Date",
+            date.today()
+        )
+
     if st.button("Save Holding"):
 
-        add_holding(
-        stock_name,
-        quantity,
-        buy_price,
-        current_price,
-        str(buy_date)
-    )
+        if not stock_name.strip():
+            st.warning("Please enter a stock name.")
 
-st.toast("Stock holding saved successfully")    
-st.markdown("---")
-# ==============================
-# JKJ AI Portfolio Health v0.2
-# ==============================
+        elif buy_price <= 0:
+            st.warning("Please enter a valid Buy Price.")
 
-portfolio = get_portfolio()
+        else:
 
-if portfolio:
+            add_holding(
+                stock_name.strip().upper(),
+                quantity,
+                buy_price,
+                current_price,
+                str(buy_date)
+            )
 
-    total_investment = 0
-    total_current_value = 0
+            st.success("Stock holding saved successfully.")
+            st.rerun()
+
+    st.markdown("---")
+
+    # ==========================================
+    # Load Portfolio
+    # ==========================================
+
+    portfolio = get_portfolio()
+
+    # ==========================================
+    # Prepare Live Portfolio Data
+    # ==========================================
+
+    holdings_for_engine = []
 
     for item in portfolio:
+
         stock = item[0]
         quantity = item[1]
         buy_price = item[2]
+        stored_current_price = item[3]
+        buy_date = item[4]
 
         live_data = get_stock_data(stock)
 
-        current_price = live_data.get(
-            "Current Price",
-            item[3]
+        current_price = live_data.get("Current Price")
+
+        if current_price is None:
+            current_price = stored_current_price
+
+        holdings_for_engine.append(
+            (
+                stock,
+                quantity,
+                buy_price,
+                current_price,
+                buy_date
+            )
         )
+    # ==========================================
+    # Portfolio Engine
+    # ==========================================
 
-        total_investment += quantity * buy_price
-        total_current_value += quantity * current_price
-        total_profit_loss = total_current_value - total_investment
-        total_return = (total_profit_loss / total_investment) * 100
-  
+    portfolio_result = calculate_portfolio(
+        holdings_for_engine
+    )
 
-    if total_investment > 0:
-        portfolio_return = (
-            total_profit_loss / total_investment
-        ) * 100
-    else:
-        portfolio_return = 0
-
+    # ==========================================
+    # JKJ AI Portfolio Health
+    # ==========================================
 
     st.subheader("📊 JKJ AI Portfolio Health")
+
+    total_investment = portfolio_result[
+        "total_investment"
+    ]
+
+    total_current_value = portfolio_result[
+        "total_current_value"
+    ]
+
+    total_profit_loss = portfolio_result[
+        "total_profit_loss"
+    ]
+
+    portfolio_return = portfolio_result[
+        "portfolio_return"
+    ]
+
+    number_of_holdings = portfolio_result[
+        "number_of_holdings"
+    ]
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -120,86 +179,95 @@ if portfolio:
             f"{portfolio_return:.2f}%"
         )
 
+    # ==========================================
+    # JKJ Capital Protection Alerts
+    # ==========================================
 
-if total_return <= -20:
+    if portfolio_return <= -20:
 
-    st.error(
-        f"🚨 Capital Protection Alert\n\n"
-        f"Portfolio drawdown has exceeded the JKJ AI safety limit.\n\n"
-        f"Current Loss: {round(total_return,2)}%\n\n"
-        "Action:\n"
-        "Review holdings. Protect capital before attempting recovery."
-    )
+        st.error(
+            "🚨 Capital Protection Alert\n\n"
+            "Portfolio drawdown has exceeded "
+            "the JKJ AI safety limit.\n\n"
+            f"Current Loss: {portfolio_return:.2f}%\n\n"
+            "Action:\n"
+            "Review holdings. Protect capital "
+            "before attempting recovery."
+        )
 
-elif total_return <= -10:
+    elif portfolio_return <= -10:
 
-    st.warning(
-        "🔴 Risk Alert: Portfolio loss exceeds 10%. "
-        "Review holdings and protect capital."
-    )
+        st.warning(
+            "🔴 Risk Alert: Portfolio loss exceeds 10%. "
+            "Review holdings and protect capital."
+        )
 
-elif total_return <= -5:
+    elif portfolio_return <= -5:
 
-    st.info(
-        "🟡 Caution: Portfolio showing weakness. "
-        "Monitor closely before adding exposure."
-    )
+        st.info(
+            "🟡 Caution: Portfolio showing weakness. "
+            "Monitor closely before adding exposure."
+        )
 
-else:
-
-    st.success(
-        "🟢 Portfolio health is within acceptable risk limits."
-    )
-
-st.markdown("---")
-portfolio = get_portfolio()   
-st.subheader("My Portfolio Holdings")
-if st.button("🔄 Refresh Live Prices"):
-    st.rerun()
-
-
-
-if portfolio:
-
-    st.write("")
-
-data = []
-
-for item in portfolio:
-
-    stock = item[0]
-    quantity = item[1]
-    buy_price = item[2]
-    buy_date = item[4]
-
-    live_data = get_stock_data(stock)
-
-    current_price = live_data.get(
-        "Current Price",
-        item[3]
-    )
-
-    investment = quantity * buy_price
-    current_value = quantity * current_price
-    profit_loss = current_value - investment
-
-    if investment > 0:
-        return_percent = (profit_loss / investment) * 100
     else:
-        return_percent = 0
 
-    data.append({
-        "Stock": stock,
-        "Quantity": quantity,
-        "Buy Price": buy_price,
-        "Current Price": current_price,
-        "Investment": investment,
-        "Current Value": current_value,
-        "Profit/Loss": profit_loss,
-        "Return %": round(return_percent, 2),
-        "Buy Date": buy_date
-    })
+        st.success(
+            "🟢 Portfolio health is within acceptable "
+            "risk limits."
+        )
+
+    st.markdown("---")
+
+    # ==========================================
+    # Portfolio Holdings
+    # ==========================================
+
+    st.subheader("My Portfolio Holdings")
+
+    if st.button("🔄 Refresh Live Prices"):
+        st.rerun()
+
+    if not portfolio_result["holdings"]:
+
+        st.info(
+            "No portfolio holdings yet. "
+            "Add your first holding above."
+        )
+
+        return
+
+    # ==========================================
+    # Holdings Table
+    # ==========================================
+
+    data = []
+
+    for holding in portfolio_result["holdings"]:
+
+        data.append(
+            {
+                "Stock": holding["Stock"],
+                "Quantity": holding["Quantity"],
+                "Buy Price": holding["Buy Price"],
+                "Current Price": holding["Current Price"],
+                "Investment": holding["Investment"],
+                "Current Value": holding["Current Value"],
+                "Profit/Loss": holding["Profit/Loss"],
+                "Return %": round(
+                    holding["Return %"],
+                    2
+                ),
+                "Allocation %": round(
+                    holding["Allocation %"],
+                    2
+                ),
+                "Buy Date": holding["Buy Date"]
+            }
+        )
 
     st.table(data)
 
-
+    st.caption(
+        f"JKJ AI Portfolio Engine | "
+        f"{number_of_holdings} holding(s)"
+    )
