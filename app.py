@@ -8,6 +8,7 @@ from modules.technical_engine import calculate_technical_quality
 from modules.volume_engine import calculate_volume_confirmation
 from modules.market_engine import calculate_market_alignment
 from modules.sector_engine import calculate_sector_strength
+from modules.decision_engine import generate_decision
 
 st.set_page_config(page_title=APP_NAME, page_icon="📈", layout="wide")
 
@@ -60,6 +61,18 @@ score = calculate_opportunity_score(
 st.subheader("Opportunity Intelligence Score")
 
 st.write(f"Overall Score: {score['Overall Score']}/100")
+decision = generate_decision(
+    opportunity_score=score["Overall Score"],
+    risk_level="HIGH",
+    portfolio_loss=-42.45
+)
+
+st.subheader("JKJ AI Decision")
+
+st.write(decision["JKJ Decision"])
+
+for reason in decision["Reasons"]:
+    st.write("• " + reason)
 
 st.write("Score Explanation:")
 st.write("Technical Analysis:")
