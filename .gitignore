@@ -1,3 +1,4 @@
 __pycache__/
 *.pyc
 modules/portfolio_v02_backup.py
+database/jkj_ai.db
