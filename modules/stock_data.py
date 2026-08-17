@@ -4,6 +4,7 @@ import pandas as pd
 
 def calculate_rsi(prices, period=14):
     """Calculate a basic RSI from closing prices."""
+
     delta = prices.diff()
 
     gains = delta.clip(lower=0)
@@ -16,6 +17,7 @@ def calculate_rsi(prices, period=14):
         return 100.0
 
     rs = average_gain.iloc[-1] / average_loss.iloc[-1]
+
     rsi = 100 - (100 / (1 + rs))
 
     return round(float(rsi), 2)
@@ -27,6 +29,9 @@ def get_stock_data(symbol):
 
     Example:
     KITEX -> KITEX.NS
+
+    This module provides raw market evidence.
+    Intelligence engines interpret that evidence separately.
     """
 
     symbol = symbol.strip().upper()
@@ -47,24 +52,66 @@ def get_stock_data(symbol):
             return {
                 "Symbol": symbol,
                 "Status": "No market data found",
+                "Data Status": "FAILED",
+                "Missing Data": "Stock history",
                 "Current Price": None,
+                "Open": None,
+                "High": None,
+                "Low": None,
+                "Close": None,
+                "Volume": None,
+                "MA20": None,
+                "MA50": None,
+                "MA200": None,
                 "52 Week High": None,
                 "52 Week Low": None,
                 "RSI": None,
                 "Volume Trend": "Unknown",
-                "Sector Strength": None,
             }
 
-        close_prices = history["Close"].dropna()
-        volume = history["Volume"].dropna()
+        # Remove rows without closing prices
+        history = history.dropna(subset=["Close"])
 
+        close_prices = history["Close"]
+        volume = history["Volume"].fillna(0)
+
+        # Current OHLC values
         current_price = float(close_prices.iloc[-1])
+        current_open = float(history["Open"].iloc[-1])
+        current_high = float(history["High"].iloc[-1])
+        current_low = float(history["Low"].iloc[-1])
+
+        # 52-week range
         week_52_high = float(close_prices.max())
         week_52_low = float(close_prices.min())
 
-        rsi = calculate_rsi(close_prices)
+        # Moving averages
+        ma20 = (
+            float(close_prices.rolling(20).mean().iloc[-1])
+            if len(close_prices) >= 20
+            else None
+        )
 
-        # Compare recent average volume with the previous period
+        ma50 = (
+            float(close_prices.rolling(50).mean().iloc[-1])
+            if len(close_prices) >= 50
+            else None
+        )
+
+        ma200 = (
+            float(close_prices.rolling(200).mean().iloc[-1])
+            if len(close_prices) >= 200
+            else None
+        )
+
+        # RSI
+        rsi = (
+            calculate_rsi(close_prices)
+            if len(close_prices) >= 14
+            else None
+        )
+
+        # Volume trend
         recent_volume = volume.tail(20).mean()
         previous_volume = volume.tail(60).head(40).mean()
 
@@ -80,23 +127,49 @@ def get_stock_data(symbol):
         return {
             "Symbol": symbol,
             "Status": "OK",
+            "Data Status": "COMPLETE",
+            "Missing Data": None,
+
             "Current Price": round(current_price, 2),
+            "Open": round(current_open, 2),
+            "High": round(current_high, 2),
+            "Low": round(current_low, 2),
+            "Close": round(current_price, 2),
+            "Volume": int(volume.iloc[-1]),
+
+            "MA20": round(ma20, 2) if ma20 is not None else None,
+            "MA50": round(ma50, 2) if ma50 is not None else None,
+            "MA200": round(ma200, 2) if ma200 is not None else None,
+
             "52 Week High": round(week_52_high, 2),
             "52 Week Low": round(week_52_low, 2),
+
             "RSI": rsi,
             "Volume Trend": volume_trend,
-            "Sector Strength": None,
         }
 
     except Exception as e:
         return {
             "Symbol": symbol,
             "Status": f"Data error: {str(e)}",
+            "Data Status": "FAILED",
+            "Missing Data": "Stock market data",
+
             "Current Price": None,
+            "Open": None,
+            "High": None,
+            "Low": None,
+            "Close": None,
+            "Volume": None,
+
+            "MA20": None,
+            "MA50": None,
+            "MA200": None,
+
             "52 Week High": None,
             "52 Week Low": None,
+
             "RSI": None,
             "Volume Trend": "Unknown",
-            "Sector Strength": None,
         }
     
