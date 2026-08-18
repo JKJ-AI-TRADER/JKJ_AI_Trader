@@ -1,63 +1,82 @@
 def calculate_market_alignment(stock):
     """
-    JKJ AI Market Alignment Engine v0.1
+    JKJ AI Market Alignment Engine v0.2
 
-    Wisdom Before Wealth.
+    Component 1:
+    NIFTY Market Trend = 8 points
 
-    Market condition must support decisions.
-    Every score must have a reason.
+    Wisdom Before Wealth:
+    Every point must be explainable.
+    Missing data receives no positive score.
     """
+
+    market = stock.get("Market Data", {})
 
     score = 0
     reasons = []
 
-    current_price = stock.get("Current Price", 0)
-    high_52 = stock.get("52 Week High", 0)
+    current_price = market.get("Current Price")
+    ma20 = market.get("MA20")
+    ma50 = market.get("MA50")
+    ma200 = market.get("MA200")
 
-    # Temporary market assessment
-    # Later connected to Nifty API
+    # --------------------------------------------------
+    # NIFTY Market Trend — 8 Points
+    # --------------------------------------------------
 
-    if current_price > 0 and high_52 > 0:
-
-        distance_from_high = (
-            (high_52 - current_price) / high_52
-        ) * 100
-
-        if distance_from_high < 10:
-            score += 10
-            reasons.append(
-                "Stock is showing relative strength"
-            )
-
-        elif distance_from_high < 25:
-            score += 7
-            reasons.append(
-                "Stock is moderately aligned with market strength"
-            )
-
+    # Price vs MA20 — 1 point
+    if current_price is not None and ma20 is not None:
+        if current_price > ma20:
+            score += 1
+            reasons.append("NIFTY is above MA20 (+1/1)")
         else:
-            score += 5
-            reasons.append(
-                "Market alignment requires caution"
-            )
-
+            reasons.append("NIFTY is below MA20 (+0/1)")
     else:
-        score += 5
-        reasons.append(
-            "Insufficient market data"
-        )
+        reasons.append("NIFTY price or MA20 data unavailable (+0/1)")
 
+    # Price vs MA50 — 2 points
+    if current_price is not None and ma50 is not None:
+        if current_price > ma50:
+            score += 2
+            reasons.append("NIFTY is above MA50 (+2/2)")
+        else:
+            reasons.append("NIFTY is below MA50 (+0/2)")
+    else:
+        reasons.append("NIFTY price or MA50 data unavailable (+0/2)")
 
-    # Placeholder until Nifty integration
+    # Price vs MA200 — 2 points
+    if current_price is not None and ma200 is not None:
+        if current_price > ma200:
+            score += 2
+            reasons.append("NIFTY is above MA200 (+2/2)")
+        else:
+            reasons.append("NIFTY is below MA200 (+0/2)")
+    else:
+        reasons.append("NIFTY price or MA200 data unavailable (+0/2)")
 
-    score += 5
+    # MA20 vs MA50 — 1 point
+    if ma20 is not None and ma50 is not None:
+        if ma20 > ma50:
+            score += 1
+            reasons.append("NIFTY MA20 is above MA50 (+1/1)")
+        else:
+            reasons.append("NIFTY MA20 is below MA50 (+0/1)")
+    else:
+        reasons.append("NIFTY MA20 or MA50 data unavailable (+0/1)")
 
-    reasons.append(
-        "Overall market trend requires Nifty confirmation"
-    )
-
+    # MA50 vs MA200 — 2 points
+    if ma50 is not None and ma200 is not None:
+        if ma50 > ma200:
+            score += 2
+            reasons.append("NIFTY MA50 is above MA200 (+2/2)")
+        else:
+            reasons.append("NIFTY MA50 is below MA200 (+0/2)")
+    else:
+        reasons.append("NIFTY MA50 or MA200 data unavailable (+0/2)")
 
     return {
         "Market Alignment Score": score,
-        "Market Explanation": reasons
+        "NIFTY Market Trend Score": score,
+        "NIFTY Market Trend Maximum": 8,
+        "Market Explanation": reasons,
     }
