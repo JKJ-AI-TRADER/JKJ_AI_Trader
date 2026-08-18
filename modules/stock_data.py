@@ -1,7 +1,86 @@
 import yfinance as yf
 import pandas as pd
 
+def get_nifty_data():
+    """
+    Fetch NIFTY 50 market data using Yahoo Finance.
 
+    Raw market evidence only.
+    No scoring or decision-making is performed here.
+    """
+
+    try:
+        ticker = yf.Ticker("^NSEI")
+        history = ticker.history(period="1y")
+
+        if history.empty:
+            return {
+                "Status": "No NIFTY market data found",
+                "Data Status": "FAILED",
+                "Current Price": None,
+                "MA20": None,
+                "MA50": None,
+                "MA200": None,
+                "RSI": None,
+            }
+
+        history = history.dropna(subset=["Close"])
+        close_prices = history["Close"]
+
+        current_price = float(close_prices.iloc[-1])
+
+        ma20 = (
+            float(close_prices.rolling(20).mean().iloc[-1])
+            if len(close_prices) >= 20
+            else None
+        )
+
+        ma50 = (
+            float(close_prices.rolling(50).mean().iloc[-1])
+            if len(close_prices) >= 50
+            else None
+        )
+
+        ma200 = (
+            float(close_prices.rolling(200).mean().iloc[-1])
+            if len(close_prices) >= 200
+            else None
+        )
+
+        delta = close_prices.diff()
+        gains = delta.clip(lower=0)
+        losses = -delta.clip(upper=0)
+
+        average_gain = gains.rolling(14).mean()
+        average_loss = losses.rolling(14).mean()
+
+        if average_loss.iloc[-1] == 0:
+            rsi = 100.0
+        else:
+            rs = average_gain.iloc[-1] / average_loss.iloc[-1]
+            rsi = 100 - (100 / (1 + rs))
+
+        return {
+            "Status": "OK",
+            "Data Status": "COMPLETE",
+            "Current Price": round(current_price, 2),
+            "MA20": round(ma20, 2) if ma20 is not None else None,
+            "MA50": round(ma50, 2) if ma50 is not None else None,
+            "MA200": round(ma200, 2) if ma200 is not None else None,
+            "RSI": round(float(rsi), 2),
+        }
+
+    except Exception as e:
+        return {
+            "Status": f"NIFTY data error: {str(e)}",
+            "Data Status": "FAILED",
+            "Current Price": None,
+            "MA20": None,
+            "MA50": None,
+            "MA200": None,
+            "RSI": None,
+        }
+    
 def calculate_rsi(prices, period=14):
     """Calculate a basic RSI from closing prices."""
 
@@ -44,6 +123,7 @@ def get_stock_data(symbol):
 
     try:
         ticker = yf.Ticker(ticker_symbol)
+        nifty_data = get_nifty_data()
 
         # Get approximately one year of daily data
         history = ticker.history(period="1y")
@@ -146,6 +226,7 @@ def get_stock_data(symbol):
 
             "RSI": rsi,
             "Volume Trend": volume_trend,
+            "Market Data": nifty_data,            
         }
 
     except Exception as e:
