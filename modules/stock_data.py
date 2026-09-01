@@ -25,6 +25,7 @@ def get_nifty_data():
             }
 
         history = history.dropna(subset=["Close"])
+
         close_prices = history["Close"]
 
         current_price = float(close_prices.iloc[-1])
@@ -33,7 +34,7 @@ def get_nifty_data():
             float(close_prices.rolling(20).mean().iloc[-1])
             if len(close_prices) >= 20
             else None
-        )
+        )   
 
         ma50 = (
             float(close_prices.rolling(50).mean().iloc[-1])
@@ -153,6 +154,20 @@ def get_stock_data(symbol):
         history = history.dropna(subset=["Close"])
 
         close_prices = history["Close"]
+
+        # Historical prices for relative strength analysis
+        price_20d_ago = (
+            float(close_prices.iloc[-21])
+            if len(close_prices) >= 21
+            else None
+        )
+
+        price_50d_ago = (
+            float(close_prices.iloc[-51])
+            if len(close_prices) >= 51
+            else None
+        )
+       
         volume = history["Volume"].fillna(0)
 
         # Current OHLC values
