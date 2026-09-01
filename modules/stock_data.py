@@ -238,10 +238,13 @@ def get_stock_data(symbol):
 
             "52 Week High": round(week_52_high, 2),
             "52 Week Low": round(week_52_low, 2),
+"RSI": rsi,
 
-            "RSI": rsi,
-            "Volume Trend": volume_trend,
-            "Market Data": nifty_data,            
+"Price 20 Days Ago": round(price_20d_ago, 2) if price_20d_ago is not None else None,
+"Price 50 Days Ago": round(price_50d_ago, 2) if price_50d_ago is not None else None,
+
+"Volume Trend": volume_trend,
+"Market Data": nifty_data,        
         }
 
     except Exception as e:
