@@ -3,6 +3,7 @@ import pandas as pd
 
 def get_nifty_data():
     """
+    nifty_data = get_nifty_data()
     Fetch NIFTY 50 market data using Yahoo Finance.
 
     Raw market evidence only.
@@ -152,7 +153,13 @@ def get_stock_data(symbol):
 
         # Remove rows without closing prices
         history = history.dropna(subset=["Close"])
-
+        if history.empty:
+            return {
+                "Symbol": symbol,
+                "Status": "No valid closing price data found",
+                "Data Status": "FAILED",
+                "Missing Data": "Closing price data",
+            }
         close_prices = history["Close"]
 
         # Historical prices for relative strength analysis
@@ -167,11 +174,16 @@ def get_stock_data(symbol):
             if len(close_prices) >= 51
             else None
         )
-       
+        price_200d_ago = (
+            float(close_prices.iloc[-201])
+            if len(close_prices) >= 201
+            else None
+        )      
         volume = history["Volume"].fillna(0)
 
         # Current OHLC values
         current_price = float(close_prices.iloc[-1])
+  
         current_open = float(history["Open"].iloc[-1])
         current_high = float(history["High"].iloc[-1])
         current_low = float(history["Low"].iloc[-1])
@@ -206,7 +218,78 @@ def get_stock_data(symbol):
             else None
         )
 
-        # Volume trend
+        # -----------------------------------------
+        # SHORT-TERM TREND
+        # -----------------------------------------
+
+        if (
+            ma20 is not None
+            and ma50 is not None
+            and current_price > ma20
+            and ma20 > ma50
+            and price_20d_ago is not None
+            and current_price > price_20d_ago
+        ):
+            short_term_trend = "IMPROVING"
+
+        elif (
+            ma20 is not None
+            and ma50 is not None
+            and current_price < ma20
+            and ma20 < ma50
+            and price_20d_ago is not None
+            and current_price < price_20d_ago
+        ):
+            short_term_trend = "DETERIORATING"
+
+        else:
+            short_term_trend = "STABLE"
+
+        # -----------------------------------------
+        # LONG-TERM TREND
+        # -----------------------------------------
+
+        if (
+            ma50 is not None
+            and ma200 is not None
+            and current_price > ma200
+            and ma50 > ma200
+            and price_200d_ago is not None
+            and current_price > price_200d_ago
+        ):
+            long_term_trend = "UPTREND"
+
+        elif (
+            ma50 is not None
+            and ma200 is not None
+            and current_price < ma200
+            and ma50 < ma200
+            and price_200d_ago is not None
+            and current_price < price_200d_ago
+        ):
+            long_term_trend = "DOWNTREND"
+
+        else:
+            long_term_trend = "STABLE"
+
+        # -----------------------------------------
+        # RECOVERY CONFIRMATION
+        # -----------------------------------------
+
+        recovery_confirmed = False
+
+        if (
+            short_term_trend == "IMPROVING"
+            and current_price > ma20
+            and rsi is not None
+            and rsi >= 50
+        ):
+            recovery_confirmed = True
+
+        # -----------------------------------------
+        # VOLUME TREND
+        # -----------------------------------------
+
         recent_volume = volume.tail(20).mean()
         previous_volume = volume.tail(60).head(40).mean()
 
@@ -238,15 +321,33 @@ def get_stock_data(symbol):
 
             "52 Week High": round(week_52_high, 2),
             "52 Week Low": round(week_52_low, 2),
-"RSI": rsi,
+            "RSI": rsi,
 
-"Price 20 Days Ago": round(price_20d_ago, 2) if price_20d_ago is not None else None,
-"Price 50 Days Ago": round(price_50d_ago, 2) if price_50d_ago is not None else None,
+            "Price 20 Days Ago": (
+                round(price_20d_ago, 2)
+                if price_20d_ago is not None
+                else None
+            ),
 
-"Volume Trend": volume_trend,
-"Market Data": nifty_data,        
+            "Price 50 Days Ago": (
+                round(price_50d_ago, 2)
+                if price_50d_ago is not None
+                else None
+            ),
+
+            "Price 200 Days Ago": (
+                round(price_200d_ago, 2)
+                if price_200d_ago is not None
+                else None
+            ),
+
+            "Short-Term Trend": short_term_trend,
+            "Long-Term Trend": long_term_trend,
+            "Recovery Confirmed": recovery_confirmed,
+
+            "Volume Trend": volume_trend,
+            "Market Data": nifty_data,
         }
-
     except Exception as e:
         return {
             "Symbol": symbol,
@@ -269,6 +370,16 @@ def get_stock_data(symbol):
             "52 Week Low": None,
 
             "RSI": None,
+
+            "Price 20 Days Ago": None,
+            "Price 50 Days Ago": None,
+            "Price 200 Days Ago": None,
+
+            "Short-Term Trend": "UNKNOWN",
+            "Long-Term Trend": "UNKNOWN",
+            "Recovery Confirmed": False,
+
             "Volume Trend": "Unknown",
+
+            "Market Data": nifty_data
         }
-    

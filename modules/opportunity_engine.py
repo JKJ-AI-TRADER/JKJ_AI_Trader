@@ -1,58 +1,245 @@
-def calculate_opportunity_score(
-    market_alignment,
-    sector_strength,
-    technical_quality,
-    volume_confirmation,
-    risk_reward
-):
-    """
-    JKJ AI Opportunity Engine v0.1
+"""
+JKJ AI Opportunity Engine v0.2
 
-    Every score must be explainable.
-    Wisdom Before Wealth.
+Wisdom Before Wealth.
+
+A falling stock is not automatically an opportunity.
+
+This engine looks for:
+- Price momentum
+- Volume support
+- Healthy momentum
+- Early recovery evidence
+
+Recovery candidates may be identified for WATCH,
+but strong evidence is required before a stock
+is considered a strong opportunity.
+"""
+
+
+def analyze_opportunity(stock_data):
+    """
+    Identify whether a stock shows a potential opportunity.
+
+    This engine analyses market evidence only.
+    It does not generate a final buy or sell decision.
     """
 
-    total_score = (
-        market_alignment
-        + sector_strength
-        + technical_quality
-        + volume_confirmation
-        + risk_reward
+    if not stock_data:
+        return {
+            "Opportunity Condition": "Unknown",
+            "Opportunity Score": 0,
+            "Maximum Score": 5,
+            "Standard Score": 0,
+            "Explanation": ["No stock data available."]
+        }
+
+    if stock_data.get("Data Status") != "COMPLETE":
+        return {
+            "Opportunity Condition": "Unknown",
+            "Opportunity Score": 0,
+            "Maximum Score": 5,
+            "Standard Score": 0,
+            "Explanation": ["Stock market data is incomplete."]
+        }
+
+    current_price = stock_data.get("Current Price")
+    price_20d_ago = stock_data.get("Price 20 Days Ago")
+    price_50d_ago = stock_data.get("Price 50 Days Ago")
+
+    ma20 = stock_data.get("MA20")
+
+    volume_trend = stock_data.get("Volume Trend")
+    rsi = stock_data.get("RSI")
+
+    short_term_trend = stock_data.get(
+        "Short-Term Trend",
+        "UNKNOWN"
     )
 
-    explanation = []
+    recovery_confirmed = stock_data.get(
+        "Recovery Confirmed",
+        False
+    )
 
-    if market_alignment >= 16:
-        explanation.append("Market trend is supportive")
-    else:
-        explanation.append("Market trend needs caution")
+    score = 0
+    reasons = []
 
-    if sector_strength >= 16:
-        explanation.append("Sector strength is positive")
-    else:
-        explanation.append("Sector momentum is weak")
+    # -----------------------------------------
+    # 1. SHORT-TERM PRICE MOMENTUM
+    # -----------------------------------------
 
-    if technical_quality >= 16:
-        explanation.append("Technical setup is healthy")
-    else:
-        explanation.append("Technical setup needs review")
+    if (
+        current_price is not None
+        and price_20d_ago is not None
+    ):
 
-    if volume_confirmation >= 16:
-        explanation.append("Volume confirms interest")
-    else:
-        explanation.append("Volume confirmation is limited")
+        if current_price > price_20d_ago:
 
-    if risk_reward >= 16:
-        explanation.append("Risk reward is favourable")
+            score += 1
+
+            reasons.append(
+                "Price is higher than 20 days ago."
+            )
+
+        else:
+
+            reasons.append(
+                "Price is not higher than 20 days ago."
+            )
+
+    # -----------------------------------------
+    # 2. MEDIUM-TERM PRICE MOMENTUM
+    # -----------------------------------------
+
+    if (
+        current_price is not None
+        and price_50d_ago is not None
+    ):
+
+        if current_price > price_50d_ago:
+
+            score += 1
+
+            reasons.append(
+                "Price is higher than 50 days ago."
+            )
+
+        else:
+
+            reasons.append(
+                "Price is not higher than 50 days ago."
+            )
+
+    # -----------------------------------------
+    # 3. VOLUME SUPPORT
+    # -----------------------------------------
+
+    if volume_trend == "Increasing":
+
+        score += 1
+
+        reasons.append(
+            "Volume is increasing."
+        )
+
+    elif volume_trend == "Decreasing":
+
+        reasons.append(
+            "Volume is decreasing."
+        )
+
     else:
-        explanation.append("Risk reward requires caution")
+
+        reasons.append(
+            "Volume is stable or unavailable."
+        )
+
+    # -----------------------------------------
+    # 4. RSI MOMENTUM / RECOVERY
+    # -----------------------------------------
+
+    if rsi is not None:
+
+        if 40 <= rsi <= 65:
+
+            score += 1
+
+            reasons.append(
+                "RSI is in a favourable opportunity zone."
+            )
+
+        elif 30 <= rsi < 40:
+
+            reasons.append(
+                "RSI remains weak but may support a future "
+                "recovery watch."
+            )
+
+        elif rsi < 30:
+
+            reasons.append(
+                "RSI is deeply oversold, but this alone is "
+                "not a buy signal."
+            )
+
+        else:
+
+            reasons.append(
+                "RSI is relatively high."
+            )
+
+    # -----------------------------------------
+    # 5. RECOVERY EVIDENCE
+    # -----------------------------------------
+
+    recovery_evidence = False
+
+    if (
+        short_term_trend == "IMPROVING"
+        and current_price is not None
+        and ma20 is not None
+        and current_price > ma20
+        and rsi is not None
+        and rsi >= 40
+    ):
+
+        recovery_evidence = True
+
+        score += 1
+
+        reasons.append(
+            "Short-term recovery evidence is appearing."
+        )
+
+    # -----------------------------------------
+    # CONFIRMED RECOVERY
+    # -----------------------------------------
+
+    if recovery_confirmed:
+
+        reasons.append(
+            "Recovery has been confirmed by the trend engine."
+        )
+
+    # -----------------------------------------
+    # FINAL OPPORTUNITY CONDITION
+    # -----------------------------------------
+
+    if score >= 4:
+
+        opportunity_condition = (
+            "Strong Opportunity"
+        )
+
+    elif score >= 2:
+
+        opportunity_condition = (
+            "Possible Opportunity"
+        )
+
+    elif recovery_evidence:
+
+        opportunity_condition = (
+            "Recovery Candidate"
+        )
+
+    else:
+
+        opportunity_condition = (
+            "Weak Opportunity"
+        )
+
+    standard_score = round(
+        (score / 5) * 100,
+        2
+    )
 
     return {
-        "Market Alignment": market_alignment,
-        "Sector Strength": sector_strength,
-        "Technical Quality": technical_quality,
-        "Volume Confirmation": volume_confirmation,
-        "Risk Reward": risk_reward,
-        "Overall Score": total_score,
-        "Explanation": explanation
+        "Opportunity Condition": opportunity_condition,
+        "Opportunity Score": score,
+        "Maximum Score": 5,
+        "Standard Score": standard_score,
+        "Recovery Evidence": recovery_evidence,
+        "Explanation": reasons
     }
