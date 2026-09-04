@@ -19,7 +19,7 @@ It brings together:
 The engine does not place trades.
 It produces an explainable analysis.
 """
-
+from modules.momentum_engine import analyse_momentum
 from modules.stock_data import get_stock_data
 from modules.market_engine import analyze_market
 from modules.technical_engine import analyze_technical
@@ -34,7 +34,7 @@ def analyze_stock(
     symbol,
     portfolio_loss=0,
     holding_status=False,
-    stock_loss=0,
+    purchase_price=0,
     trend="UNKNOWN",
     long_term_trend="UNKNOWN",
     recovery_confirmed=False
@@ -51,7 +51,25 @@ def analyze_stock(
     # -----------------------------------------
 
     stock_data = get_stock_data(symbol)
+    # -----------------------------------------
+    # HOLDING PROFIT / LOSS CALCULATION
+    # -----------------------------------------
 
+    stock_loss_percentage = 0
+
+    if holding_status:
+
+        current_price = stock_data.get(
+            "Current Price",
+            0
+        )
+
+        if purchase_price > 0 and current_price > 0:
+
+            stock_loss_percentage = (
+                (current_price - purchase_price)
+                / purchase_price
+            ) * 100
     if stock_data.get("Data Status") != "COMPLETE":
         return {
             "Symbol": symbol,
@@ -61,7 +79,7 @@ def analyze_stock(
                 "Unable to retrieve stock data."
             )
         }
-
+    momentum_analysis = analyse_momentum(stock_data)
     # -----------------------------------------
     # TREND INFORMATION FROM STOCK DATA
     # -----------------------------------------
@@ -86,7 +104,7 @@ def analyze_stock(
     # -----------------------------------------
     # 2. MARKET ANALYSIS
     # -----------------------------------------
-
+    
     market_result = analyze_market(
         stock_data.get("Market Data", {})
     )
@@ -98,7 +116,18 @@ def analyze_stock(
     technical_result = analyze_technical(
         stock_data
     )
-
+    market_score = market_result.get(
+        "Standard Score",
+        0
+    )
+    market_state = market_result.get(
+        "Market State",
+        "UNKNOWN"
+    )
+    technical_score = technical_result.get(
+        "Standard Score",
+        0
+    )
     # -----------------------------------------
     # 4. OPPORTUNITY ANALYSIS
     # -----------------------------------------
@@ -106,7 +135,10 @@ def analyze_stock(
     opportunity_result = analyze_opportunity(
         stock_data
     )
-
+    base_opportunity_score = opportunity_result.get(
+        "Standard Score",
+        0
+    )
     # -----------------------------------------
     # 5. COMBINED OPPORTUNITY SCORE
     # -----------------------------------------
@@ -143,7 +175,7 @@ def analyze_stock(
 
         decision_result = analyze_holding(
             stock_name=symbol.upper(),
-            stock_loss=stock_loss,
+            stock_loss=stock_loss_percentage,
             opportunity_score=combined_score,
             risk_level=risk_level,
             trend=short_term_trend,
@@ -160,8 +192,25 @@ def analyze_stock(
             holding_status=False,
             trend=short_term_trend,
             long_term_trend=long_term_trend,
-            recovery_confirmed=recovery_confirmed
-        )
+            recovery_confirmed=recovery_confirmed,
+
+            momentum_condition=momentum_analysis.get(
+                "Momentum Condition",
+                "UNKNOWN"
+            ),
+
+            momentum_score=momentum_analysis.get(
+                "Standard Score",
+                0
+            ),
+
+            base_opportunity_score=base_opportunity_score,
+
+            technical_score=technical_score,
+
+            market_score=market_score,
+            market_state=market_state
+    )   
 
     # -----------------------------------------
     # FINAL EXPLAINABLE RESULT
@@ -172,18 +221,21 @@ def analyze_stock(
         "Analysis Status": "COMPLETE",
 
         "Holding Status": holding_status,
+        "Purchase Price": purchase_price,
+        "Current Price": stock_data.get("Current Price", 0),
+        "Profit/Loss Percentage": round(stock_loss_percentage, 2),          
 
         "Stock Data": stock_data,
 
         "Market Analysis": market_result,
         "Technical Analysis": technical_result,
         "Opportunity Analysis": opportunity_result,
-
+        "Momentum Analysis": momentum_analysis,
         "Score Analysis": score_result,
 
         "Risk Analysis": risk_result,
 
-"Short-Term Trend": short_term_trend,
+        "Short-Term Trend": short_term_trend,
         "Long-Term Trend": long_term_trend,
         "Recovery Confirmed": recovery_confirmed,
 

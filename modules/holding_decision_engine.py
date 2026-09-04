@@ -226,7 +226,26 @@ def analyze_holding(
 
     elif stock_loss < 0:
 
-        if long_term_weak:
+        if (
+            long_term_weak
+            and opportunity_score < 30
+        ):
+
+            decision = "REDUCE"
+
+            reasons.append(
+                "The position is losing value while the longer-term trend remains weak."
+            )
+
+            reasons.append(
+                "The opportunity score is very low and recovery has not been confirmed."
+            )
+
+            reasons.append(
+                "Reducing exposure helps protect capital while waiting for stronger recovery evidence."
+            )
+
+        elif long_term_weak:
 
             decision = "WATCH"
 
@@ -238,6 +257,7 @@ def analyze_holding(
             opportunity_score >= 70
             and risk_level != "HIGH"
         ):
+
             decision = "HOLD"
 
             reasons.append(
@@ -245,6 +265,7 @@ def analyze_holding(
             )
 
         else:
+
             decision = "WATCH"
 
             reasons.append(
@@ -281,7 +302,6 @@ def analyze_holding(
             reasons.append(
                 "Opportunity conditions have weakened."
             )
-
     # ---------------------------------------------
     # ADDITIONAL WARNINGS
     # ---------------------------------------------
