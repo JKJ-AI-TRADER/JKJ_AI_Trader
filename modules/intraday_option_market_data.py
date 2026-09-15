@@ -184,5 +184,5 @@ def create_option_market_data(
             intraday_range_percentage,
             4
         ),
-        "Timestamp": timestamp,
+                "Timestamp": timestamp,
     }
