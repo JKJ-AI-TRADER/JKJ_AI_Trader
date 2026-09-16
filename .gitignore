@@ -5,3 +5,4 @@ database/jkj_ai.db
 __pycache__/
 *.py[cod]
 .kite_request_token
+.kite_session
