@@ -3,7 +3,7 @@ JKJ AI Trader
 Test — Intraday Option Candidate Enrichment V6
 """
 
-from intraday_option_candidate_enrichment import (
+from modules.intraday_option_candidate_enrichment import (
     enrich_option_candidate
 )
 
