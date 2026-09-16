@@ -255,8 +255,30 @@ def get_kite_session():
             "Reason": "Authenticated Kite session was not returned.",
         }
 
+    access_token = getattr(
+        kite,
+        "access_token",
+        None
+    )
+
+    if not access_token:
+        return {
+            "Status": "FAILED",
+            "Reason": "Authenticated access token was not available.",
+        }
+
+    saved = save_session(
+        access_token
+    )
+
+    if not saved:
+        return {
+            "Status": "FAILED",
+            "Reason": "Authenticated session could not be saved.",
+        }
+
     return {
-        "Status": "AUTHENTICATED",
+        "Status": "AUTHENTICATED_AND_SAVED",
         "Kite": kite,
     }
 
