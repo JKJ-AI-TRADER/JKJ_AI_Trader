@@ -3,7 +3,7 @@ JKJ AI Trader
 Test — Intraday Option Opportunity Decision V7
 """
 
-from intraday_option_opportunity_decision import (
+from modules.intraday_option_opportunity_decision import (
     decide_option_opportunity
 )
 
