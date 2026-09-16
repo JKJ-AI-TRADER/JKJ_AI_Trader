@@ -3,7 +3,7 @@ JKJ AI Trader
 Test — Intraday Option Entry Bridge V8
 """
 
-from intraday_option_entry_bridge import (
+from modules.intraday_option_entry_bridge import (
     evaluate_option_entry
 )
 

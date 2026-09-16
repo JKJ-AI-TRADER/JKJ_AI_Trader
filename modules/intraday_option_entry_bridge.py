@@ -10,18 +10,19 @@ This module does NOT:
 - place orders
 - connect to Zerodha
 - modify main.py
-- modify the existing engines
+- modify the existing Momentum Engine
+- replace the Entry Gate
 """
 
-from intraday_cost_engine import (
+from modules.intraday_cost_engine import (
     calculate_intraday_cost
 )
 
-from intraday_risk_engine import (
+from modules.intraday_risk_engine import (
     analyse_intraday_risk
 )
 
-from intraday_entry_gate import (
+from modules.intraday_entry_gate import (
     evaluate_intraday_entry
 )
 
