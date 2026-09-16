@@ -5,7 +5,7 @@ Test — Intraday Option Momentum Adapter V4
 
 import pandas as pd
 
-from intraday_option_momentum_adapter import (
+from modules.intraday_option_momentum_adapter import (
     prepare_option_momentum_data
 )
 

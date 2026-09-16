@@ -26,6 +26,9 @@ from modules.intraday_zerodha_option_adapter import (
 from modules.intraday_option_real_market_observer import (
     observe_option_market,
 )
+from modules.nifty_option_contract_selector import (
+    select_nearby_contracts,
+)
 
 from modules.intraday_option_observation_record import (
     create_option_observation_record,
@@ -40,8 +43,7 @@ from modules.intraday_paper_trading import (
 )
 
 
-TRADING_SYMBOL = "NIFTY2691525000PE"
-INSTRUMENT_TOKEN = 12125186
+
 
 
 def main():
@@ -99,7 +101,54 @@ def main():
     kite.set_access_token(access_token)
 
     print("\nZerodha authentication: SUCCESS")
+    nfo_instruments = kite.instruments("NFO")
 
+    nifty_ltp = kite.ltp("NSE:NIFTY 50")
+    nifty_spot = nifty_ltp["NSE:NIFTY 50"]["last_price"]
+
+    nifty_options = [
+        item
+        for item in nfo_instruments
+        if item.get("name") == "NIFTY"
+        and item.get("instrument_type") in ("CE", "PE")
+    ]
+
+    expiries = sorted(
+        {
+            item.get("expiry")
+            for item in nifty_options
+            if item.get("expiry") is not None
+        }
+    )
+
+    selected_expiry = expiries[0]
+
+    contracts = select_nearby_contracts(
+        instruments=nifty_options,
+        nifty_spot=nifty_spot,
+        expiry=selected_expiry,
+        contracts_per_side=1,
+    )
+
+    if contracts.get("Status") != "SELECTED":
+        print("ERROR: NIFTY option contract selection failed.")
+        print(contracts)
+        return
+
+    contract = contracts["Contracts"][0]
+
+    TRADING_SYMBOL = contract.get("tradingsymbol")
+    INSTRUMENT_TOKEN = contract.get("instrument_token")
+    STRIKE = contract.get("strike")
+    OPTION_TYPE = contract.get("instrument_type")
+    EXPIRY = contract.get("expiry")
+
+    print("\nDynamic NIFTY contract selected:")
+    print("Trading Symbol:", TRADING_SYMBOL)
+    print("Instrument Token:", INSTRUMENT_TOKEN)
+    print("Strike:", STRIKE)
+    print("Option Type:", OPTION_TYPE)
+    print("Expiry:", EXPIRY)
     quote_response = kite.quote(
         [
             f"NFO:{TRADING_SYMBOL}",
@@ -159,8 +208,9 @@ def main():
         stop_loss=1550.00,
         target=1700.00,
         underlying="NIFTY",
-        strike=25000,
-        option_type="PE",
+        expiry=EXPIRY,
+        strike=STRIKE,
+        option_type=OPTION_TYPE,
     )
 
     print("\n4. V11 Paper Trade:")

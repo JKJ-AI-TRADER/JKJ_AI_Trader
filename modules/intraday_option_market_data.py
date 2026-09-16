@@ -185,4 +185,5 @@ def create_option_market_data(
             4
         ),
                 "Timestamp": timestamp,
+                "Last Trade Time": timestamp,
     }

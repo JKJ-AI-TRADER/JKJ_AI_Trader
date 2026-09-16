@@ -3,7 +3,7 @@ JKJ AI Trader
 Test — Intraday Option Market Data Provider V3
 """
 
-from intraday_option_market_data import (
+from modules.intraday_option_market_data import (
     create_option_market_data
 )
 
