@@ -17,7 +17,7 @@ V9 does NOT:
 - modify the existing paper-trading engine
 """
 
-from intraday_paper_trading import (
+from modules.intraday_paper_trading import (
     open_paper_trade
 )
 

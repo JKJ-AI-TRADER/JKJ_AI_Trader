@@ -32,13 +32,13 @@ This module does NOT:
 Wisdom Before Wealth.
 """
 
-from intraday_trade_logger import (
+from modules.intraday_trade_logger import (
     create_trade_record,
     update_peak_price,
     record_sell_event,
 )
 
-from intraday_position_slicing import (
+from modules.intraday_position_slicing import (
     calculate_slice_plan,
 )
 
