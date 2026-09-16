@@ -9,7 +9,7 @@ No Zerodha.
 No live orders.
 """
 
-from intraday_option_paper_position_monitor import (
+from modules.intraday_option_paper_position_monitor import (
     monitor_option_paper_position
 )
 

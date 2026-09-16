@@ -25,15 +25,15 @@ V10 does NOT:
 - execute real trades
 """
 
-from intraday_profit_protection import (
+from modules.intraday_profit_protection import (
     evaluate_profit_protection
 )
 
-from intraday_exit_engine import (
+from modules.intraday_exit_engine import (
     evaluate_intraday_exit
 )
 
-from intraday_position_slicing import (
+from modules.intraday_position_slicing import (
     calculate_slice_plan
 )
 
