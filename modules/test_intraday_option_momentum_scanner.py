@@ -5,7 +5,7 @@ Test — Intraday Option Momentum Scanner V5
 
 import pandas as pd
 
-from intraday_option_momentum_scanner import (
+from modules.intraday_option_momentum_scanner import (
     scan_option_momentum
 )
 

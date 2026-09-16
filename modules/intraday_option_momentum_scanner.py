@@ -14,7 +14,7 @@ This module does NOT:
 - modify the existing Momentum Engine
 """
 
-from intraday_momentum_engine import (
+from modules.intraday_momentum_engine import (
     analyse_intraday_momentum
 )
 
