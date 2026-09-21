@@ -54,8 +54,22 @@ def _blocked(reason):
 def synchronize_target_exit(
     v11_exit_result,
     execution_record,
+    global_original_quantity,
     previous_cumulative_filled=0,
 ):
+    try:
+        global_original_quantity = int(global_original_quantity)
+    except (TypeError, ValueError):
+        return {
+            "Status": "BLOCKED",
+            "Reason": "Global original quantity must be an integer",
+        }
+
+    if global_original_quantity <= 0:
+        return {
+            "Status": "BLOCKED",
+            "Reason": "Global original quantity must be positive",
+        }    
     """
     Synchronize one actual V11 exit event with one
     V17.2 target-stage execution record.
@@ -154,7 +168,7 @@ def synchronize_target_exit(
 
     try:
         original_quantity = int(
-            execution_record["Original Quantity"]
+            global_original_quantity
         )
         planned_quantity = int(
             execution_record["Planned Quantity"]

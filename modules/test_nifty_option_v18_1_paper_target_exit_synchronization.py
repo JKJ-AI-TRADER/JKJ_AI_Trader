@@ -47,6 +47,7 @@ v11_t1 = make_v11_exit_result(
 result_t1 = synchronize_target_exit(
     v11_exit_result=v11_t1,
     execution_record=t1_execution,
+    global_original_quantity=65,
     previous_cumulative_filled=0,
 )
 
@@ -78,6 +79,7 @@ v11_t2 = make_v11_exit_result(
 result_t2 = synchronize_target_exit(
     v11_exit_result=v11_t2,
     execution_record=t2_execution,
+    global_original_quantity=65,
     previous_cumulative_filled=15,
 )
 
@@ -95,9 +97,12 @@ assert result_t2["V17.2 Execution Confirmed"] is True
 # TEST 3 — TARGET 3 final synchronization
 # ---------------------------------------------------------
 
+# V17.4 creates the T3 execution using the
+# actual remaining quantity: 28.
+
 t3_execution = create_target_exit_execution(
     target_stage="TARGET 3",
-    original_quantity=65,
+    original_quantity=28,
     planned_quantity=28,
 )
 
@@ -110,6 +115,7 @@ v11_t3 = make_v11_exit_result(
 result_t3 = synchronize_target_exit(
     v11_exit_result=v11_t3,
     execution_record=t3_execution,
+    global_original_quantity=65,
     previous_cumulative_filled=37,
 )
 
@@ -159,6 +165,7 @@ v11_mismatch = make_v11_exit_result(
 result_mismatch = synchronize_target_exit(
     v11_exit_result=v11_mismatch,
     execution_record=t2_mismatch_execution,
+    global_original_quantity=65,
     previous_cumulative_filled=15,
 )
 
@@ -184,6 +191,7 @@ v11_zero = make_v11_exit_result(
 result_zero = synchronize_target_exit(
     v11_exit_result=v11_zero,
     execution_record=t1_zero_execution,
+    global_original_quantity=65,
     previous_cumulative_filled=0,
 )
 
@@ -209,6 +217,7 @@ v11_over_execution = make_v11_exit_result(
 result_over = synchronize_target_exit(
     v11_exit_result=v11_over_execution,
     execution_record=t3_over_execution,
+    global_original_quantity=65,
     previous_cumulative_filled=37,
 )
 
@@ -266,4 +275,3 @@ print(
 print("No V11 modification.")
 print("No V17.2 modification.")
 print("No Zerodha order.")
-print("Wisdom Before Wealth.")
