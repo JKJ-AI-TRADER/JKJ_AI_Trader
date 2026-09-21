@@ -20,7 +20,7 @@ This module does NOT:
 Wisdom Before Wealth.
 """
 
-from modules.nifty_option_v17_6_policy_allocation import (
+from nifty_option_v17_6_policy_allocation import (
     allocate_with_policy,
 )
 
