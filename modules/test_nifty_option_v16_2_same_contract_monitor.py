@@ -21,6 +21,10 @@ from modules.intraday_zerodha_session_manager import (
     get_kite_session,
 )
 
+from modules.nifty_option_contract_selector import (
+    select_nearby_contracts,
+)
+
 from modules.nifty_option_paper_position_lifecycle import (
     update_paper_position,
 )
@@ -37,7 +41,7 @@ def main():
     #    Based on the successful V16.2 Stage 3 structure.
     # ---------------------------------------------------------
 
-    trading_symbol = "NIFTY2692223300CE"
+    trading_symbol = None
 
     trade = {
         "Status": "OPEN",
@@ -65,11 +69,7 @@ def main():
         "Paper Trade Permission": "PERMITTED",
     }
 
-    print("\nKnown-Good Paper Position:")
-    print("Symbol:", trade["Symbol"])
-    print("Expiry:", trade["Expiry"])
-    print("Strike:", trade["Strike"])
-    print("Option Type:", trade["Option Type"])
+    
     print("Entry Price:", trade["Entry Price"])
     print("Quantity:", trade["Current Quantity"])
     print("Stop Loss:", trade["Stop Loss"])
@@ -99,7 +99,7 @@ def main():
         return
 
     # ---------------------------------------------------------
-    # 3. Find exact paper contract
+    # 3. Select current NIFTY paper contract
     # ---------------------------------------------------------
 
     instruments = kite.instruments("NFO")
@@ -108,33 +108,92 @@ def main():
         print("\nNFO instrument list unavailable.")
         return
 
-    matching_contracts = [
-        contract
-        for contract in instruments
-        if contract.get("tradingsymbol")
-        == trading_symbol
-    ]
+    nifty_spot = kite.ltp(
+        "NSE:NIFTY 50"
+    )["NSE:NIFTY 50"]["last_price"]
 
-    if not matching_contracts:
-        print(
-            "\nExact paper contract not found in NFO."
-        )
-        print("Symbol:", trading_symbol)
+    if not isinstance(
+        nifty_spot,
+        (int, float),
+    ) or nifty_spot <= 0:
+        print("\nInvalid NIFTY spot price.")
         print("Stage 4B stopped safely.")
         return
 
-    exact_contract = matching_contracts[0]
+    nifty_options = [
+        item
+        for item in instruments
+        if item.get("name") == "NIFTY"
+        and item.get("instrument_type") in ("CE", "PE")
+    ]
+
+    expiries = sorted({
+        item.get("expiry")
+        for item in nifty_options
+        if item.get("expiry")
+    })
+
+    if not expiries:
+        print("\nNo NIFTY option expiry found.")
+        print("Stage 4B stopped safely.")
+        return
+
+    selected_expiry = expiries[0]
+
+    selection = select_nearby_contracts(
+        instruments=nifty_options,
+        nifty_spot=nifty_spot,
+        expiry=selected_expiry,
+        contracts_per_side=2,
+    )
+
+    if selection.get("Status") != "SELECTED":
+        print("\nCurrent NIFTY contract selection failed.")
+        print(
+            "Reason:",
+            selection.get("Reason"),
+        )
+        print("Stage 4B stopped safely.")
+        return
+
+    ce_contracts = [
+        contract
+        for contract in selection.get("Contracts", [])
+        if contract.get("instrument_type") == "CE"
+    ]
+
+    if not ce_contracts:
+        print("\nNo current NIFTY CE contract selected.")
+        print("Stage 4B stopped safely.")
+        return
+
+    exact_contract = ce_contracts[0]
+
+    trading_symbol = exact_contract.get(
+        "tradingsymbol"
+    )
 
     instrument_token = exact_contract.get(
         "instrument_token"
     )
-    trade["Expiry"] = exact_contract.get("expiry")
-    if not instrument_token:
-        print(
-            "\nExact contract instrument token missing."
-        )
+
+    if not trading_symbol or not instrument_token:
+        print("\nSelected contract is incomplete.")
         print("Stage 4B stopped safely.")
         return
+
+    trade["Symbol"] = trading_symbol
+    trade["Strike"] = exact_contract.get("strike")
+    trade["Expiry"] = exact_contract.get("expiry")
+    trade["Option Type"] = exact_contract.get(
+        "instrument_type"
+    )
+
+    print("\nKnown-Good Paper Position:")
+    print("Symbol:", trade["Symbol"])
+    print("Expiry:", trade["Expiry"])
+    print("Strike:", trade["Strike"])
+    print("Option Type:", trade["Option Type"])
 
     # ---------------------------------------------------------
     # 4. Verify exact identity
