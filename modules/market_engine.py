@@ -84,13 +84,20 @@ def analyze_market(nifty_data):
     # FINAL MARKET CONDITION
     # -----------------------------------------
 
-    if score >= 3:
+    if score >= 4:
+
         market_condition = "Bullish"
 
+    elif score == 3:
+
+        market_condition = "Recovering"
+
     elif score == 2:
-        market_condition = "Neutral"
+
+        market_condition = "Early Recovery"
 
     else:
+
         market_condition = "Bearish"
 
     # -----------------------------------------
@@ -112,7 +119,59 @@ def analyze_market(nifty_data):
     else:
         market_state = "Weak Market Conditions"
 
-    standard_score = round((score / 4) * 100, 2)
+    # -----------------------------------------
+    # STANDARD MARKET SCORE
+    # -----------------------------------------
+
+    standard_score = round(
+        (score / 4) * 100,
+        2
+    )
+
+    # -----------------------------------------
+    # MARKET SCORE FLOOR
+    # -----------------------------------------
+
+    # A weak market should not automatically
+    # be treated as having zero strength.
+    # Preserve a distinction between a deeply
+    # bearish market and a weak market.
+
+    if market_condition == "Bearish":
+
+    # Oversold market:
+    # Weak technically, but possible recovery zone
+
+        if rsi is not None and rsi < 30:
+
+            standard_score = max(
+            standard_score,
+            20
+        )
+
+    # Weak market with some stability
+    elif rsi is not None and rsi >= 40:
+
+        standard_score = max(
+            standard_score,
+            25
+        )
+
+    # Weak bearish market
+    elif rsi is not None and rsi >= 30:
+
+        standard_score = max(
+            standard_score,
+            15
+        )
+
+        print()
+        print("DEBUG MARKET ANALYSIS")
+        print("NIFTY RSI:", rsi)
+        print("Raw Market Score:", score)
+        print("Market Condition:", market_condition)
+        print("Final Standard Score:", standard_score)
+        print()
 
     return {
         "Market Condition": market_condition,

@@ -220,13 +220,65 @@ def analyze_holding(
                 "Recovery evidence is not yet strong enough for a confident HOLD."
             )
 
-    # ---------------------------------------------
+        # ---------------------------------------------
     # 4. MODERATE LOSS
     # ---------------------------------------------
 
     elif stock_loss < 0:
 
-        if (
+        # Very small loss
+        if stock_loss >= -3:
+
+            if (
+                risk_level != "HIGH"
+                and long_term_trend != "DOWNTREND"
+                and opportunity_score >= 50
+            ):
+
+                if (
+                    rsi is not None
+                    and float(rsi) >= 70
+                ):
+
+                    decision = "HOLD WITH CAUTION"
+
+                    reasons.append(
+                        "The position is close to breakeven and "
+                        "overall conditions remain acceptable."
+                    )
+
+                    warnings.append(
+                        "RSI indicates the stock may be overextended."
+                    )
+
+                    warnings.append(
+                        "Continue holding, but monitor for "
+                        "possible profit-taking or momentum weakness."
+                    )
+
+                else:
+
+                    decision = "HOLD"
+
+                    reasons.append(
+                        "The position is close to breakeven and "
+                        "overall conditions remain acceptable."
+                    )
+
+                positive_signals.append(
+                    "The current loss is small."
+                )
+
+            else:
+
+                decision = "WATCH"
+
+                reasons.append(
+                    "The current loss is small, but conditions "
+                    "require continued monitoring."
+                )
+
+        elif (
             long_term_weak
             and opportunity_score < 30
         ):
@@ -234,15 +286,18 @@ def analyze_holding(
             decision = "REDUCE"
 
             reasons.append(
-                "The position is losing value while the longer-term trend remains weak."
+                "The position is losing value while the "
+                "longer-term trend remains weak."
             )
 
             reasons.append(
-                "The opportunity score is very low and recovery has not been confirmed."
+                "The opportunity score is very low and "
+                "recovery has not been confirmed."
             )
 
             reasons.append(
-                "Reducing exposure helps protect capital while waiting for stronger recovery evidence."
+                "Reducing exposure helps protect capital "
+                "while waiting for stronger recovery evidence."
             )
 
         elif long_term_weak:
@@ -250,7 +305,8 @@ def analyze_holding(
             decision = "WATCH"
 
             reasons.append(
-                "The position is losing value and the longer-term trend remains weak."
+                "The position is losing value and the "
+                "longer-term trend remains weak."
             )
 
         elif (
@@ -261,7 +317,8 @@ def analyze_holding(
             decision = "HOLD"
 
             reasons.append(
-                "The loss is moderate and overall conditions remain acceptable."
+                "The loss is moderate and overall "
+                "conditions remain acceptable."
             )
 
         else:

@@ -14,10 +14,20 @@ This stage does NOT:
 """
 
 import os
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 SESSION_FILE = ".kite_session"
+INDIA_TIMEZONE = ZoneInfo("Asia/Kolkata")
+
+
+def _today_ist():
+    """
+    Return today's date according to India Standard Time.
+    """
+
+    return datetime.now(INDIA_TIMEZONE).date().isoformat()
 
 
 def session_file_exists():
@@ -46,6 +56,7 @@ def session_file_date():
             "r",
             encoding="utf-8",
         ) as file:
+
             stored_date = file.readline().strip()
 
         if not stored_date:
@@ -54,12 +65,14 @@ def session_file_date():
         return stored_date
 
     except Exception:
+
         return None
 
 
 def session_is_from_today():
     """
-    Check whether the local session file belongs to today.
+    Check whether the local session file belongs to
+    today according to India Standard Time.
     """
 
     stored_date = session_file_date()
@@ -67,11 +80,13 @@ def session_is_from_today():
     if not stored_date:
         return False
 
-    return stored_date == date.today().isoformat()
+    return stored_date == _today_ist()
+
+
 def save_session(access_token):
     """
     Save an authenticated Kite access token locally
-    together with today's date.
+    together with today's India date.
 
     The token is never printed.
     """
@@ -93,7 +108,7 @@ def save_session(access_token):
         ) as file:
 
             file.write(
-                date.today().isoformat()
+                _today_ist()
                 + "\n"
             )
 
@@ -104,6 +119,7 @@ def save_session(access_token):
         return True
 
     except Exception:
+
         return False
 
 
@@ -128,7 +144,7 @@ def read_session_token():
             stored_date = file.readline().strip()
             access_token = file.read().strip()
 
-        if stored_date != date.today().isoformat():
+        if stored_date != _today_ist():
             return None
 
         if not access_token:
@@ -137,16 +153,26 @@ def read_session_token():
         return access_token
 
     except Exception:
+
         return None
+
+
 def delete_session():
     """
     Delete the locally stored Kite session.
     """
 
-    if os.path.exists(SESSION_FILE):
-        os.remove(SESSION_FILE)
+    try:
 
-    return True
+        if os.path.exists(SESSION_FILE):
+            os.remove(SESSION_FILE)
+
+        return True
+
+    except Exception:
+
+        return False
+
 
 def validate_kite_session(kite):
     """
@@ -172,6 +198,48 @@ def validate_kite_session(kite):
 
         return False
 
+
+def _build_kite_from_token(access_token):
+    """
+    Build and validate a Kite session from a saved token.
+
+    Returns
+    -------
+    KiteConnect object or None
+    """
+
+    if not access_token:
+        return None
+
+    try:
+
+        from kiteconnect import KiteConnect
+
+        api_key = os.getenv(
+            "JKJ_KITE_API_KEY"
+        )
+
+        if not api_key:
+            return None
+
+        kite = KiteConnect(
+            api_key=api_key
+        )
+
+        kite.set_access_token(
+            access_token
+        )
+
+        if not validate_kite_session(kite):
+            return None
+
+        return kite
+
+    except Exception:
+
+        return None
+
+
 def get_kite_session():
     """
     Return an authenticated Kite session.
@@ -180,6 +248,9 @@ def get_kite_session():
 
     If today's session is invalid or no session exists,
     use the existing Zerodha authentication helper.
+
+    A newly authenticated session is saved, read back,
+    and validated again before being returned.
 
     Returns
     -------
@@ -192,51 +263,41 @@ def get_kite_session():
 
     if existing_token:
 
-        try:
+        kite = _build_kite_from_token(
+            existing_token
+        )
 
-            from kiteconnect import KiteConnect
-
-            api_key = os.getenv(
-                "JKJ_KITE_API_KEY"
-            )
-
-            if not api_key:
-                return {
-                    "Status": "FAILED",
-                    "Reason": "JKJ_KITE_API_KEY is not available.",
-                }
-
-            kite = KiteConnect(
-                api_key=api_key
-            )
-
-            kite.set_access_token(
-                existing_token
-            )
-
-            if validate_kite_session(kite):
-
-                return {
-                    "Status": "SESSION_REUSED",
-                    "Kite": kite,
-                }
-
-            delete_session()
-
-        except Exception as error:
+        if kite is not None:
 
             return {
-                "Status": "FAILED",
-                "Reason": str(error),
+                "Status": "SESSION_REUSED",
+                "Kite": kite,
             }
+
+        # Existing session is no longer valid.
+        # Remove only the invalid local session and
+        # continue to fresh authentication.
+        delete_session()
 
     from modules.intraday_zerodha_auth import (
         create_zerodha_session,
     )
 
-    authentication_result = (
-        create_zerodha_session()
-    )
+    try:
+
+        authentication_result = (
+            create_zerodha_session()
+        )
+
+    except Exception as error:
+
+        return {
+            "Status": "FAILED",
+            "Reason": (
+                "Zerodha authentication helper failed: "
+                + str(error)
+            ),
+        }
 
     if authentication_result.get(
         "Status"
@@ -252,7 +313,10 @@ def get_kite_session():
 
         return {
             "Status": "FAILED",
-            "Reason": "Authenticated Kite session was not returned.",
+            "Reason": (
+                "Authenticated Kite session "
+                "was not returned."
+            ),
         }
 
     access_token = getattr(
@@ -262,31 +326,68 @@ def get_kite_session():
     )
 
     if not access_token:
+
         return {
             "Status": "FAILED",
-            "Reason": "Authenticated access token was not available.",
+            "Reason": (
+                "Authenticated access token "
+                "was not available."
+            ),
         }
 
-    saved = save_session(
+    if not save_session(
         access_token
-    )
+    ):
 
-    if not saved:
         return {
             "Status": "FAILED",
-            "Reason": "Authenticated session could not be saved.",
+            "Reason": (
+                "Authenticated session "
+                "could not be saved."
+            ),
+        }
+
+    # Re-read the saved token and validate it.
+    saved_token = read_session_token()
+
+    if not saved_token:
+
+        return {
+            "Status": "FAILED",
+            "Reason": (
+                "Saved Zerodha session "
+                "could not be read back."
+            ),
+        }
+
+    verified_kite = _build_kite_from_token(
+        saved_token
+    )
+
+    if verified_kite is None:
+
+        return {
+            "Status": "FAILED",
+            "Reason": (
+                "Saved Zerodha session "
+                "could not be revalidated."
+            ),
         }
 
     return {
-        "Status": "AUTHENTICATED_AND_SAVED",
-        "Kite": kite,
+        "Status": "AUTHENTICATED_AND_VERIFIED",
+        "Kite": verified_kite,
     }
+
 
 def authenticate_and_save_session():
     """
     Authenticate with Zerodha using the existing V12.4
     authentication helper and save the resulting access
     token for reuse during the current day.
+
+    The saved token is read back and validated before
+    the function reports success.
 
     The access token is never printed.
     """
@@ -295,9 +396,21 @@ def authenticate_and_save_session():
         create_zerodha_session,
     )
 
-    authentication_result = (
-        create_zerodha_session()
-    )
+    try:
+
+        authentication_result = (
+            create_zerodha_session()
+        )
+
+    except Exception as error:
+
+        return {
+            "Status": "FAILED",
+            "Reason": (
+                "Zerodha authentication helper failed: "
+                + str(error)
+            ),
+        }
 
     if authentication_result.get(
         "Status"
@@ -310,9 +423,13 @@ def authenticate_and_save_session():
     )
 
     if kite is None:
+
         return {
             "Status": "FAILED",
-            "Reason": "Authenticated Kite session was not returned.",
+            "Reason": (
+                "Authenticated Kite session "
+                "was not returned."
+            ),
         }
 
     access_token = getattr(
@@ -322,22 +439,54 @@ def authenticate_and_save_session():
     )
 
     if not access_token:
+
         return {
             "Status": "FAILED",
-            "Reason": "Authenticated access token was not available.",
+            "Reason": (
+                "Authenticated access token "
+                "was not available."
+            ),
         }
 
-    saved = save_session(
+    if not save_session(
         access_token
-    )
+    ):
 
-    if not saved:
         return {
             "Status": "FAILED",
-            "Reason": "Authenticated session could not be saved.",
+            "Reason": (
+                "Authenticated session "
+                "could not be saved."
+            ),
+        }
+
+    saved_token = read_session_token()
+
+    if not saved_token:
+
+        return {
+            "Status": "FAILED",
+            "Reason": (
+                "Saved Zerodha session "
+                "could not be read back."
+            ),
+        }
+
+    verified_kite = _build_kite_from_token(
+        saved_token
+    )
+
+    if verified_kite is None:
+
+        return {
+            "Status": "FAILED",
+            "Reason": (
+                "Saved Zerodha session "
+                "could not be revalidated."
+            ),
         }
 
     return {
-        "Status": "AUTHENTICATED_AND_SAVED",
-        "Kite": kite,
+        "Status": "AUTHENTICATED_AND_VERIFIED",
+        "Kite": verified_kite,
     }

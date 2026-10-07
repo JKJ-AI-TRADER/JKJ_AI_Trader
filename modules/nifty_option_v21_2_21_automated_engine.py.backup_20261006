@@ -1,0 +1,375 @@
+"""
+JKJ AI Trader
+V21.2.21 — Automated Intraday Engine
+
+Purpose:
+Connect the existing V21.2 observation, qualification,
+decision, and risk layers into one controlled workflow.
+
+Flow:
+
+Kite Session
+    ↓
+Market Session Check
+    ↓
+Genuine 09:15 Baseline / Intraday Development Mode
+    ↓
+V21.2.19 Persistent Observer
+    ↓
+V21.2.20 Candidate Qualification
+    ↓
+V21.2.20 → V21.2.16 Adapter
+    ↓
+V21.2.16 Decision + Entry Qualification
+    ↓
+V21.2.17 Risk + Stop + Targets
+
+Safety:
+- No live orders
+- No paper trades
+- No position sizing
+- No automatic BUY
+- No automatic SELL
+"""
+
+from typing import Any, Dict
+
+from modules.intraday_zerodha_session_manager import (
+    get_kite_session,
+)
+
+from modules.nifty_option_v21_2_market_session import (
+    get_market_session_state,
+)
+
+from modules.nifty_option_v21_2_19_persistent_observer import (
+    run_persistent_observer,
+)
+
+from modules.nifty_option_v21_2_20_candidate_qualification import (
+    qualify_candidates,
+)
+
+from modules.nifty_option_v21_2_20_to_v21_2_16_adapter import (
+    build_unified_observation_from_qualified_candidates,
+)
+
+from modules.nifty_option_v21_2_16_decision_entry import (
+    evaluate_unified_decision_entry,
+)
+
+from modules.nifty_option_v21_2_17_risk_stop_targets import (
+    evaluate_real_market_risk_stop_targets,
+)
+
+
+LIVE_ORDER = False
+PAPER_TRADE = False
+
+
+def run_v21_2_21_automated_engine(
+    interval_seconds: int = 15,
+    max_observations: int = 4,
+    strikes_each_side: int = 10,
+    current_time=None,
+) -> Dict[str, Any]:
+    """
+    Run the V21.2.21 automated observation-to-risk pipeline.
+
+    This version deliberately stops before paper execution.
+    """
+
+    print()
+    print("=" * 75)
+    print("JKJ AI TRADER — V21.2.21 AUTOMATED ENGINE")
+    print("=" * 75)
+    print("Mode: OBSERVATION / DECISION / RISK ONLY")
+    print("Live Order:", LIVE_ORDER)
+    print("Paper Trade:", PAPER_TRADE)
+    print()
+
+    # ---------------------------------------------------------
+    # 1. Zerodha session
+    # ---------------------------------------------------------
+
+    print("STEP 1 — Zerodha session validation")
+
+    session_result = get_kite_session()
+
+    if not isinstance(session_result, dict):
+        return {
+            "Status": "SESSION_RESULT_INVALID",
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    kite = session_result.get("Kite")
+
+    if kite is None:
+        return {
+            "Status": "SESSION_NOT_READY",
+            "Session Result": session_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    print("Session: READY")
+
+    # ---------------------------------------------------------
+    # 2. Market session
+    # ---------------------------------------------------------
+
+    print()
+    print("STEP 2 — Market session check")
+
+    session_result = get_market_session_state(
+        current_time=current_time
+    )
+
+    if not isinstance(session_result, dict):
+        return {
+            "Status": "MARKET_SESSION_RESULT_INVALID",
+            "Market Session Result": session_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    session_state = session_result.get("Session State")
+
+    print("Market Session:", session_state)
+
+    if session_state in {
+        "BEFORE_PRE_MARKET",
+        "PRE_MARKET",
+        "MARKET_CLOSED",
+    }:
+        return {
+            "Status": "MARKET_NOT_AVAILABLE",
+            "Market Session": session_state,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    # ---------------------------------------------------------
+    # 3. Persistent observation
+    # ---------------------------------------------------------
+
+    print()
+    print("STEP 3 — V21.2.19 persistent observation")
+
+    observer_result = run_persistent_observer(
+        kite=kite,
+        interval_seconds=interval_seconds,
+        max_observations=max_observations,
+        strikes_each_side=strikes_each_side,
+    )
+
+    if not isinstance(observer_result, dict):
+        return {
+            "Status": "OBSERVER_RESULT_INVALID",
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    if observer_result.get("Status") != "PERSISTENT_OBSERVER_COMPLETE":
+        return {
+            "Status": "OBSERVER_NOT_COMPLETE",
+            "Observer Result": observer_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    lifecycle_store = observer_result.get(
+        "Candidate Lifecycle",
+        {},
+    )
+
+    observation_store = observer_result.get(
+        "Observation Store",
+        {},
+    )
+
+    # ---------------------------------------------------------
+    # Observation baseline mode
+    # ---------------------------------------------------------
+    #
+    # Determine the mode from the actual observation store.
+    # Never create or infer a synthetic 09:15 baseline.
+
+    baseline_sources = set()
+
+    if isinstance(observation_store, dict):
+        for observations in observation_store.values():
+
+            if not isinstance(observations, list):
+                continue
+
+            for observation in observations:
+
+                if not isinstance(observation, dict):
+                    continue
+
+                source = observation.get(
+                    "Baseline Source"
+                )
+
+                if source:
+                    baseline_sources.add(source)
+
+    if "GENUINE_915" in baseline_sources:
+        baseline_mode = "GENUINE_915"
+    elif "SESSION_START" in baseline_sources:
+        baseline_mode = "SESSION_START"
+    else:
+        baseline_mode = "UNSPECIFIED"
+
+    print(
+        "Observation Baseline Mode:",
+        baseline_mode,
+    )
+
+    # ---------------------------------------------------------
+    # 4. Candidate qualification
+    # ---------------------------------------------------------
+
+    print()
+    print("STEP 4 — V21.2.20 candidate qualification")
+
+    qualification_result = qualify_candidates(
+        lifecycle_store
+    )
+
+    if qualification_result.get("Status") != (
+        "CANDIDATE_QUALIFICATION_COMPLETE"
+    ):
+        return {
+            "Status": "QUALIFICATION_NOT_COMPLETE",
+            "Qualification Result": qualification_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    qualified_candidates = qualification_result.get(
+        "Qualified Candidates",
+        [],
+    )
+
+    print(
+        "Qualified Candidates:",
+        len(qualified_candidates),
+    )
+
+    if not qualified_candidates:
+        return {
+            "Status": "NO_QUALIFIED_CANDIDATES",
+            "Observer Result": observer_result,
+            "Qualification Result": qualification_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    # ---------------------------------------------------------
+    # 5. Adapt observations for V21.2.16
+    # ---------------------------------------------------------
+
+    print()
+    print("STEP 5 — V21.2.20 → V21.2.16 observation adapter")
+
+    unified_observation = (
+        build_unified_observation_from_qualified_candidates(
+            observation_store,
+            qualification_result,
+        )
+    )
+
+    if unified_observation.get("Status") != (
+        "UNIFIED_OBSERVATION_COMPLETE"
+    ):
+        return {
+            "Status": "UNIFIED_OBSERVATION_NOT_COMPLETE",
+            "Unified Observation": unified_observation,
+            "Qualification Result": qualification_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    # ---------------------------------------------------------
+    # 6. Decision + Entry
+    # ---------------------------------------------------------
+
+    print()
+    print("STEP 6 — V21.2.16 decision + entry qualification")
+
+    decision_result = evaluate_unified_decision_entry(
+        unified_observation
+    )
+
+    if decision_result.get("Status") != (
+        "DECISION_ENTRY_COMPLETE"
+    ):
+        return {
+            "Status": "DECISION_ENTRY_NOT_COMPLETE",
+            "Decision Result": decision_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    # ---------------------------------------------------------
+    # 7. Risk / stop / targets
+    # ---------------------------------------------------------
+
+    print()
+    print("STEP 7 — V21.2.17 risk + stop + targets")
+
+    risk_result = evaluate_real_market_risk_stop_targets(
+        decision_result,
+        unified_observation,
+    )
+
+    if risk_result.get("Status") != (
+        "RISK_STOP_TARGETS_COMPLETE"
+    ):
+        return {
+            "Status": "RISK_ANALYSIS_NOT_COMPLETE",
+            "Risk Result": risk_result,
+            "Decision Result": decision_result,
+            "Live Order": LIVE_ORDER,
+            "Paper Trade": PAPER_TRADE,
+        }
+
+    # ---------------------------------------------------------
+    # Final result
+    # ---------------------------------------------------------
+
+    print()
+    print("=" * 75)
+    print("V21.2.21 AUTOMATED ENGINE COMPLETE")
+    print("=" * 75)
+    print("Qualified Candidates:", len(qualified_candidates))
+    print("Live Order:", LIVE_ORDER)
+    print("Paper Trade:", PAPER_TRADE)
+    print("Execution: NOT PERFORMED")
+    print("=" * 75)
+
+    return {
+        "Status": "V21_2_21_AUTOMATED_ENGINE_COMPLETE",
+        "Observer Result": observer_result,
+        "Observation Baseline Mode": baseline_mode,
+        "Qualification Result": qualification_result,
+        "Unified Observation": unified_observation,
+        "Decision Result": decision_result,
+        "Risk Result": risk_result,
+        "Live Order": LIVE_ORDER,
+        "Paper Trade": PAPER_TRADE,
+        "Execution Performed": False,
+    }
+
+
+if __name__ == "__main__":
+
+    result = run_v21_2_21_automated_engine()
+
+    print()
+    print("FINAL STATUS:", result.get("Status"))
+    print("Live Order:", result.get("Live Order"))
+    print("Paper Trade:", result.get("Paper Trade"))

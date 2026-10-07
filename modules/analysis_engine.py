@@ -22,13 +22,14 @@ It produces an explainable analysis.
 from modules.momentum_engine import analyse_momentum
 from modules.stock_data import get_stock_data
 from modules.market_engine import analyze_market
+from modules.market_confirmation_engine import analyse_market_confirmation
 from modules.technical_engine import analyze_technical
 from modules.opportunity_engine import analyze_opportunity
 from modules.score_engine import calculate_combined_score
 from modules.risk_engine import analyze_risk
 from modules.decision_engine import generate_decision
 from modules.holding_decision_engine import analyze_holding
-
+from modules.buy_trigger_engine import calculate_buy_trigger
 
 def analyze_stock(
     symbol,
@@ -121,9 +122,19 @@ def analyze_stock(
         0
     )
     market_state = market_result.get(
-        "Market State",
+        "Market Condition",
         "UNKNOWN"
     )
+    # -----------------------------------------
+    # MARKET CONFIRMATION
+    # -----------------------------------------
+
+    market_confirmation_result = (
+        analyse_market_confirmation(
+        market_state,
+        market_score
+    )
+)
     technical_score = technical_result.get(
         "Standard Score",
         0
@@ -138,6 +149,25 @@ def analyze_stock(
     base_opportunity_score = opportunity_result.get(
         "Standard Score",
         0
+    )
+    # -----------------------------------------
+    # STOCK STRENGTH SCORE
+    # -----------------------------------------
+
+    momentum_score = momentum_analysis.get(
+        "Standard Score",
+        0
+    )
+
+    stock_strength_score = (
+    technical_score
+    + momentum_score
+    + base_opportunity_score
+    ) / 3
+
+    stock_strength_score = round(
+    stock_strength_score,
+    2
     )
     # -----------------------------------------
     # 5. COMBINED OPPORTUNITY SCORE
@@ -199,19 +229,43 @@ def analyze_stock(
                 "UNKNOWN"
             ),
 
-            momentum_score=momentum_analysis.get(
-                "Standard Score",
-                0
-            ),
+            momentum_score=momentum_score,
 
             base_opportunity_score=base_opportunity_score,
 
             technical_score=technical_score,
 
-            market_score=market_score,
-            market_state=market_state
-    )   
+                        market_score=market_score,
+            market_state=market_state,
 
+            market_confirmation_status=
+                market_confirmation_result.get(
+                    "Market Confirmation Status",
+                    "UNKNOWN"
+                ),
+
+            buying_allowed=
+                market_confirmation_result.get(
+                    "Buying Allowed",
+                    False
+                )
+    )   
+    # -----------------------------------------
+    # BUY TRIGGER ANALYSIS
+    # -----------------------------------------
+
+    buy_trigger_result = calculate_buy_trigger(
+        stock_data=stock_data,
+        technical_result=technical_result,
+        decision_result=decision_result,
+        market_confirmation_result=market_confirmation_result,
+        stock_strength_score=stock_strength_score,
+        momentum_score=momentum_analysis.get(
+            "Standard Score",
+            0
+        ),
+        risk_level=risk_level
+    )
     # -----------------------------------------
     # FINAL EXPLAINABLE RESULT
     # -----------------------------------------
@@ -228,11 +282,15 @@ def analyze_stock(
         "Stock Data": stock_data,
 
         "Market Analysis": market_result,
+        "Market Confirmation": market_confirmation_result,
+
         "Technical Analysis": technical_result,
+        "Buy Trigger Analysis": buy_trigger_result,
         "Opportunity Analysis": opportunity_result,
         "Momentum Analysis": momentum_analysis,
         "Score Analysis": score_result,
-
+        "Stock Strength Score": stock_strength_score,
+        "Combined Score": combined_score,
         "Risk Analysis": risk_result,
 
         "Short-Term Trend": short_term_trend,

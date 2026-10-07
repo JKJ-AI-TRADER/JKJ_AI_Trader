@@ -49,7 +49,9 @@ def generate_decision(
     base_opportunity_score=0,
     technical_score=0,
     market_score=0,
-    market_state="UNKNOWN"
+    market_state="UNKNOWN",
+    market_confirmation_status="UNKNOWN",
+    buying_allowed=False
 ):
 
 
@@ -58,6 +60,11 @@ def generate_decision(
     long_term_trend = str(long_term_trend).upper()
     momentum_condition = str(momentum_condition).upper()
     market_state = str(market_state).upper()
+    market_confirmation_status = str(
+    market_confirmation_status
+    ).upper()
+
+    buying_allowed = bool(buying_allowed)
     momentum_score = float(momentum_score)
     confidence = calculate_confidence(
         opportunity_score,
@@ -150,6 +157,83 @@ def generate_decision(
         positive_evidence.append(
         "Momentum confirmation supports the opportunity."
     )
+        # -----------------------------------------
+    # MARKET CONFIRMATION BLOCK
+    # -----------------------------------------
+
+    if not buying_allowed:
+
+        if (
+            opportunity_score >= 50
+            or technical_score >= 70
+            or momentum_score >= 70
+        ):
+
+            missing_confirmation.append(
+                "Market confirmation is required before committing new capital."
+            )
+
+            return {
+                "JKJ Decision":
+                    "WAIT FOR MARKET CONFIRMATION",
+
+                "Confidence": 85.0,
+
+                "Reasons": [
+                    "The stock shows positive individual strength.",
+                    "However, the overall market environment is not yet favourable.",
+                    "New capital should wait for market confirmation."
+                ],
+
+                "Positive Evidence": positive_evidence,
+
+                "Risk Warnings": risk_warnings,
+
+                "Missing Confirmation":
+                    missing_confirmation,
+
+                "Next Required Signal":
+                    "Wait for the broader market to provide sufficient confirmation."
+            }
+        # -----------------------------------------
+    # STRICT BUY NOW QUALIFICATION
+    # -----------------------------------------
+
+    if (
+        buying_allowed
+        and market_score >= 40
+        and opportunity_score >= 60
+        and technical_score >= 70
+        and momentum_score >= 60
+        and base_opportunity_score >= 60
+        and risk_level == "LOW"
+        and long_term_trend != "DOWNTREND"
+    ):
+
+        return {
+            "JKJ Decision": "BUY NOW",
+
+            "Confidence": confidence,
+
+            "Reasons": [
+                "Market conditions provide sufficient confirmation.",
+                "Buying is allowed by the Market Confirmation Engine.",
+                "Stock strength meets the JKJ minimum requirements.",
+                "Technical conditions are strong.",
+                "Momentum is sufficiently positive.",
+                "Opportunity evidence is strong enough.",
+                "Risk level is LOW."
+            ],
+
+            "Positive Evidence": positive_evidence,
+
+            "Risk Warnings": risk_warnings,
+
+            "Missing Confirmation": [],
+
+            "Next Required Signal":
+                "BUY conditions are currently satisfied."
+        }       
     # -----------------------------------------
     # HIGH RISK
     # -----------------------------------------
