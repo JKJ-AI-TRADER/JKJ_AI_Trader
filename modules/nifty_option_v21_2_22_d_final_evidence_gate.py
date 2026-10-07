@@ -54,7 +54,7 @@ def evaluate_final_evidence(candidate: Dict[str, Any]) -> Dict[str, Any]:
 
     symbol = candidate.get("Trading Symbol")
 
-    lifecycle = candidate.get("Lifecycle")
+    lifecycle = candidate.get("Lifecycle State")
     qualification = candidate.get("Qualification")
 
     persistence = candidate.get("V12.6 Persistence")

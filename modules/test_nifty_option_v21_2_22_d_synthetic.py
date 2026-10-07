@@ -15,7 +15,7 @@ def make_candidate(
 ):
     return {
         "Trading Symbol": symbol,
-        "Lifecycle": lifecycle,
+        "Lifecycle State": lifecycle,
         "Qualification": qualification,
         "V12.6 Persistence": persistence,
         "V12.6 Direction": direction,
