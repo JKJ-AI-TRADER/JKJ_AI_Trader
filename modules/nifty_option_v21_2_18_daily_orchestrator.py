@@ -104,16 +104,27 @@ def run_v21_2_18_daily_orchestrator(
     session_state = session_state_result.get("Session State")
 
     # ---------------------------------------------------------
-    # 3. Pre-market preparation
+    # 3. Protect the genuine 09:15 baseline capture window.
+    #    Never start pre-market network preparation inside it.
     # ---------------------------------------------------------
-    if session_state == "PRE_MARKET":
+    ist = ZoneInfo("Asia/Kolkata")
+    current_clock = now.astimezone(ist).time()
+    baseline_window_start = time(9, 14, 30)
+    baseline_window_end = time(9, 16, 0)
+    inside_baseline_window = (
+        baseline_window_start <= current_clock <= baseline_window_end
+    )
+
+    if session_state == "PRE_MARKET" and inside_baseline_window:
+        pre_market_status = "CAPTURE_WINDOW_PRIORITY"
+
+    elif session_state == "PRE_MARKET":
         pre_market_result = evaluate_pre_market_controller(
             current_time=now,
             contracts_per_side=contracts_per_side,
         )
 
         result["Pre-Market Result"] = pre_market_result
-
         pre_market_status = pre_market_result.get("Status")
 
         if pre_market_status != "PRE_MARKET_READY":
@@ -133,7 +144,10 @@ def run_v21_2_18_daily_orchestrator(
         result["Reason"] = "Market session has ended."
         return result
 
-    elif session_state != "MARKET_SESSION":
+    elif session_state == "MARKET_SESSION":
+        pre_market_status = "MARKET_SESSION"
+
+    else:
         result["Status"] = "WAITING_FOR_MARKET_STAGE"
         result["Reason"] = (
             f"Unknown market session state: {session_state}"
@@ -141,13 +155,8 @@ def run_v21_2_18_daily_orchestrator(
         return result
 
     # ---------------------------------------------------------
-    # 4. We are now either in PRE_MARKET or MARKET_SESSION.
+    # 4. Continue to the existing genuine-baseline checks.
     # ---------------------------------------------------------
-    pre_market_status = (
-        "PRE_MARKET_READY"
-        if session_state == "PRE_MARKET"
-        else "MARKET_SESSION"
-    )
 
     # ---------------------------------------------------------
     # 4. Genuine 09:15 baseline
@@ -161,7 +170,7 @@ def run_v21_2_18_daily_orchestrator(
     else:
         # Only attempt a real baseline capture during the
         # protected 09:14:30–09:16:00 capture window.
-        current_clock = now.time()
+        current_clock = now.astimezone(ist).time()
 
         baseline_window_start = time(9, 14, 30)
         baseline_window_end = time(9, 16, 0)

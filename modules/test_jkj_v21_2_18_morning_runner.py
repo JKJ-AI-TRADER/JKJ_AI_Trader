@@ -16,7 +16,9 @@ class MorningRunnerTests(unittest.TestCase):
         cases = [
             ("08:59:59", "WAIT_FOR_PREMARKET", False),
             ("09:00:00", "PREPARE_THEN_WAIT", False),
-            ("09:14:29", "PREPARE_THEN_WAIT", False),
+            ("09:09:59", "PREPARE_THEN_WAIT", False),
+            ("09:10:00", "WAIT_FOR_PREFERRED_START", False),
+            ("09:14:29", "WAIT_FOR_PREFERRED_START", False),
             ("09:14:30", "RUN_ONCE", False),
             ("09:16:00", "RUN_ONCE", False),
             ("09:16:01", "LATE_START_NO_BASELINE", False),

@@ -22,7 +22,6 @@ The baseline allows later analysis of:
 from __future__ import annotations
 
 from datetime import datetime, time
-from datetime import datetime
 from zoneinfo import ZoneInfo
 from typing import Any, Dict, List, Optional
 
@@ -221,6 +220,25 @@ def capture_915_baseline(
     quote_data = kite.quote(symbols)
 
     captured_at = datetime.now(ZoneInfo("Asia/Kolkata"))
+
+    # Reject a quote response that finishes outside the protected window.
+    # Never label a late snapshot as a genuine 09:15 baseline.
+    if not (
+        BASELINE_CAPTURE_START
+        <= captured_at.time()
+        <= BASELINE_CAPTURE_END
+    ):
+        return {
+            "Status": "BASELINE_CAPTURE_OUTSIDE_WINDOW",
+            "Baseline Time": BASELINE_TIME,
+            "Captured At": captured_at.isoformat(timespec="seconds"),
+            "Reason": (
+                "Quote retrieval completed outside the protected "
+                "09:14:30–09:16:00 IST capture window."
+            ),
+            "Live Order": False,
+            "Paper Trade": False,
+        }
 
     baseline = []
 

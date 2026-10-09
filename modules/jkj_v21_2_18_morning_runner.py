@@ -39,8 +39,10 @@ def get_runner_action(now, baseline_available=False):
         )
     if clock < PRE_MARKET_START:
         return "WAIT_FOR_PREMARKET"
-    if clock < CAPTURE_START:
+    if clock < PREPARE_CUTOFF:
         return "PREPARE_THEN_WAIT"
+    if clock < CAPTURE_START:
+        return "WAIT_FOR_PREFERRED_START"
     # Inside the protected capture window, let the existing
     # orchestrator manage preparation and capture together.
     return "RUN_ONCE"

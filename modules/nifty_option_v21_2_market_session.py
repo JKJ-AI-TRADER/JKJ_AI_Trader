@@ -53,6 +53,13 @@ def get_market_session_state(current_time=None):
             "Reason": "current_time must be a datetime.",
         }
 
+    ist = ZoneInfo("Asia/Kolkata")
+
+    if current_time.tzinfo is None:
+        current_time = current_time.replace(tzinfo=ist)
+    else:
+        current_time = current_time.astimezone(ist)
+
     current_clock = current_time.time()
 
     if current_clock < PRE_MARKET_START:
