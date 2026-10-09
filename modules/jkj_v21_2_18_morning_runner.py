@@ -1,0 +1,240 @@
+"""JKJ V21.2.18 morning runner — controlled capture and late-start handling."""
+from datetime import datetime, time
+import json
+from pathlib import Path
+from zoneinfo import ZoneInfo
+import time as time_module
+
+from modules.nifty_option_v21_2_18_daily_orchestrator import (
+    run_v21_2_18_daily_orchestrator,
+)
+from modules.nifty_option_v21_2_18_baseline_store import (
+    BASELINE_FILE,
+    load_today_baseline,
+)
+from modules.nifty_option_v21_2_pre_market_controller import (
+    evaluate_pre_market_controller,
+)
+
+IST = ZoneInfo("Asia/Kolkata")
+PRE_MARKET_START = time(9, 0)
+PREPARE_CUTOFF = time(9, 10)
+CAPTURE_START = time(9, 14, 30)
+PREFERRED_START = time(9, 15)
+CAPTURE_END = time(9, 16)
+
+
+def get_runner_action(now, baseline_available=False):
+    """Pure timing logic for offline tests."""
+    if not isinstance(now, datetime) or now.tzinfo is None:
+        raise ValueError("now must be timezone-aware")
+
+    clock = now.astimezone(IST).time()
+
+    if clock > CAPTURE_END:
+        return (
+            "LATE_START_WITH_BASELINE"
+            if baseline_available
+            else "LATE_START_NO_BASELINE"
+        )
+    if clock < PRE_MARKET_START:
+        return "WAIT_FOR_PREMARKET"
+    if clock < CAPTURE_START:
+        return "PREPARE_THEN_WAIT"
+    # Inside the protected capture window, let the existing
+    # orchestrator manage preparation and capture together.
+    return "RUN_ONCE"
+
+
+def validate_baseline_payload(payload, now):
+    """Validate baseline identity, IST date, timestamp and actual records."""
+    if not isinstance(now, datetime) or now.tzinfo is None:
+        return False, "Validation time must be timezone-aware."
+    if not isinstance(payload, dict):
+        return False, "Invalid baseline file structure."
+
+    local_now = now.astimezone(IST)
+    if payload.get("Trading Date") != local_now.date().isoformat():
+        return False, "Trading date does not match today's IST date."
+    if payload.get("Baseline Type") != "GENUINE_915":
+        return False, "Stored baseline is not GENUINE_915."
+
+    baseline = payload.get("Baseline")
+    if not isinstance(baseline, dict):
+        return False, "Baseline payload is missing."
+    if baseline.get("Status") != "BASELINE_CAPTURE_COMPLETE":
+        return False, "Capture status is not complete."
+    if baseline.get("Baseline Type") != "GENUINE_915":
+        return False, "Capture result is not GENUINE_915."
+
+    try:
+        captured = datetime.fromisoformat(baseline["Captured At"])
+        if captured.tzinfo is None:
+            return False, "Capture timestamp has no timezone."
+        captured = captured.astimezone(IST)
+    except (KeyError, TypeError, ValueError):
+        return False, "Capture timestamp is missing or invalid."
+
+    if captured.date() != local_now.date():
+        return False, "Capture timestamp is not from today's IST date."
+    if captured.time() < CAPTURE_START:
+        return False, "Capture timestamp predates the allowed window."
+
+    records = baseline.get("Baseline")
+    count = baseline.get("Baseline Count")
+    if not isinstance(records, list) or not records:
+        return False, "No baseline records."
+    if (
+        not isinstance(count, int)
+        or isinstance(count, bool)
+        or count != len(records)
+    ):
+        return False, "Baseline Count does not match actual records."
+
+    for i, record in enumerate(records):
+        if not isinstance(record, dict) or not record.get("Trading Symbol"):
+            return False, f"Invalid symbol in baseline record {i}."
+        try:
+            price = float(record["9:15 Price"])
+            if price <= 0:
+                return False, f"Non-positive price in record {i}."
+        except (KeyError, TypeError, ValueError):
+            return False, f"Invalid price in baseline record {i}."
+
+    # Captured At is recorded after quote retrieval and can therefore be
+    # later than 09:16. The existing capture function checks its start time.
+    return True, "Baseline validation passed."
+
+
+def validate_stored_baseline(now, baseline_file=BASELINE_FILE):
+    path = Path(baseline_file)
+    if not path.exists():
+        return False, "Baseline file does not exist."
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False, "Baseline file is unreadable or invalid JSON."
+
+    valid, reason = validate_baseline_payload(payload, now)
+    if not valid:
+        return False, reason
+
+    # The existing orchestrator must also be able to load the baseline.
+    if load_today_baseline() is None:
+        return False, (
+            "Existing baseline store does not recognize today's baseline."
+        )
+    return True, reason
+
+
+def _wait_until(target):
+    now = datetime.now(IST)
+    seconds = (target - now).total_seconds()
+    if seconds > 0:
+        print(f"Waiting {seconds:.1f} seconds until "
+              f"{target.isoformat(timespec='seconds')}.")
+        time_module.sleep(seconds)
+
+
+def _result(status, **details):
+    return {
+        "Status": status,
+        **details,
+        "Live Order": False,
+        "Paper Trade": False,
+    }
+
+
+def run_morning_runner():
+    now = datetime.now(IST)
+    available, reason = validate_stored_baseline(now)
+    action = get_runner_action(now, available)
+
+    print("=" * 64)
+    print("JKJ V21.2.18 MORNING RUNNER")
+    print("IST:", now.isoformat(timespec="seconds"))
+    print("Live Order: False | Paper Trade: False")
+
+    # Never invoke the orchestrator after market close.
+    # A stored baseline does not make a closed market eligible for observation.
+    if now.time() >= time(15, 30):
+        print("Status: MARKET_CLOSED")
+        print("No observation workflow will be invoked.")
+        return _result(
+            "MARKET_CLOSED",
+            Reason="Market session has ended.",
+        )
+
+    # Late access is allowed, but a missing baseline is never backfilled.
+    if action == "LATE_START_NO_BASELINE":
+        print("Status: BASELINE_MISSED_LATE_START")
+        print("Reason:", reason)
+        print("Baseline-dependent observation skipped.")
+        return _result(
+            "BASELINE_MISSED_LATE_START",
+            Reason=reason,
+            Dependent_Observation_Skipped=True,
+        )
+
+    # A validated baseline permits one existing observation workflow call.
+    if action == "LATE_START_WITH_BASELINE":
+        print("Today's baseline is validated; invoking orchestrator once.")
+        result = run_v21_2_18_daily_orchestrator(
+            window_seconds=60, interval_seconds=15
+        )
+        orchestrator_status = result.get("Status", "UNKNOWN")
+        print("Orchestrator outcome:", orchestrator_status)
+        return _result(
+            "LATE_START_OBSERVATION_ATTEMPTED",
+            Baseline_Validation=reason,
+            Orchestrator_Status=orchestrator_status,
+            Orchestrator_Result=result,
+        )
+
+    if action == "WAIT_FOR_PREMARKET":
+        now = datetime.now(IST)
+        _wait_until(now.replace(hour=9, minute=0, second=0, microsecond=0))
+        action = "PREPARE_THEN_WAIT"
+
+    if action == "PREPARE_THEN_WAIT":
+        prep_time = datetime.now(IST)
+        try:
+            prep = evaluate_pre_market_controller(current_time=prep_time)
+        except Exception as exc:
+            prep = {"Status": "ERROR", "Reason": str(exc)}
+        print("Pre-market status:", prep.get("Status"))
+        if prep.get("Status") != "PRE_MARKET_READY":
+            reason = prep.get("Reason", "Readiness unconfirmed.")
+            print("Stopping safely:", reason)
+            return _result("PREMARKET_NOT_READY", Reason=reason)
+        _wait_until(datetime.now(IST).replace(
+            hour=9, minute=15, second=0, microsecond=0
+        ))
+
+    elif action == "WAIT_FOR_PREFERRED_START":
+        _wait_until(datetime.now(IST).replace(
+            hour=9, minute=15, second=0, microsecond=0
+        ))
+
+    invocation_time = datetime.now(IST)
+    if not CAPTURE_START <= invocation_time.time() <= CAPTURE_END:
+        valid, why = validate_stored_baseline(invocation_time)
+        status = "BASELINE_CONFIRMED" if valid else "BASELINE_WINDOW_MISSED"
+        print("Status:", status, "|", why)
+        return _result(status, Reason=why)
+
+    # Exactly one orchestrator call in the capture-stage path.
+    print("Invoking daily orchestrator once...")
+    result = run_v21_2_18_daily_orchestrator(
+        window_seconds=60, interval_seconds=15
+    )
+    valid, why = validate_stored_baseline(datetime.now(IST))
+    status = "BASELINE_CONFIRMED" if valid else "BASELINE_NOT_CONFIRMED"
+    print("Orchestrator:", result.get("Status"))
+    print("Baseline:", status, "|", why)
+    print("Live Order: False | Paper Trade: False")
+    return _result(status, Reason=why, Orchestrator_Result=result)
+
+
+if __name__ == "__main__":
+    run_morning_runner()
