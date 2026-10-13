@@ -454,7 +454,23 @@ def _evaluate_candidate(
     else:
         classification = "NORMAL"
 
+    baseline_price = candidate.get("9:15 Price")
+    movement_since_915 = _movement_since_915(
+        baseline_price,
+        latest_price,
+    )
+
     candidate["Latest Price"] = latest_price
+    candidate["Movement Since 9:15 %"] = (
+        round(movement_since_915, 2)
+        if movement_since_915 is not None
+        else None
+    )
+    candidate["9:15 Movement Level"] = (
+        classify_graduated_movement(movement_since_915)
+        if movement_since_915 is not None
+        else "BASELINE_UNAVAILABLE"
+    )
     candidate["Window Change %"] = round(window_change, 2)
     candidate["Acceleration %"] = round(daily_improvement, 2)
     candidate["Daily Change %"] = round(final_daily_change, 2)
