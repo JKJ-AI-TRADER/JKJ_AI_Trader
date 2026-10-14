@@ -14,6 +14,18 @@ calculate position size, or place orders.
 """
 
 
+import math
+
+
+def _is_finite_number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except (OverflowError, TypeError, ValueError):
+        return False
+
+
 def evaluate_targets(stop_loss_price_data):
     """
     Calculate Targets 1–3 from validated stop-loss data.
@@ -80,6 +92,15 @@ def evaluate_targets(stop_loss_price_data):
             "Reason": "Stop Distance must be numeric",
         }
 
+    if not all(
+        _is_finite_number(value)
+        for value in (entry_price, stop_price, stop_distance)
+    ):
+        return {
+            "Status": "REJECTED",
+            "Reason": "Entry Price, Stop Price and Stop Distance must be finite non-Boolean numbers",
+        }
+
     if entry_price <= 0 or stop_price <= 0:
         return {
             "Status": "REJECTED",
@@ -98,9 +119,30 @@ def evaluate_targets(stop_loss_price_data):
             "Reason": "Stop Distance must be greater than zero",
         }
 
+    expected_distance = entry_price - stop_price
+    if not math.isclose(
+        stop_distance,
+        expected_distance,
+        rel_tol=1e-9,
+        abs_tol=1e-9,
+    ):
+        return {
+            "Status": "REJECTED",
+            "Reason": "Stop Distance must equal Entry Price minus Stop Price",
+        }
+
     target_1 = entry_price + stop_distance
     target_2 = entry_price + (2 * stop_distance)
     target_3 = entry_price + (3 * stop_distance)
+
+    if not all(
+        _is_finite_number(target)
+        for target in (target_1, target_2, target_3)
+    ):
+        return {
+            "Status": "REJECTED",
+            "Reason": "Calculated targets must be finite numbers",
+        }
 
     return {
         "Status": "TARGETS_VALIDATED",

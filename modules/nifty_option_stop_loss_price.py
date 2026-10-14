@@ -10,6 +10,18 @@ position size, or place orders.
 """
 
 
+import math
+
+
+def _is_finite_number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except (OverflowError, TypeError, ValueError):
+        return False
+
+
 def evaluate_stop_loss_price(
     stop_loss_context,
     entry_price,
@@ -57,10 +69,10 @@ def evaluate_stop_loss_price(
             "Reason": f"Missing required fields: {missing_fields}",
         }
 
-    if not isinstance(entry_price, (int, float)):
+    if not _is_finite_number(entry_price):
         return {
             "Status": "REJECTED",
-            "Reason": "Entry Price must be numeric",
+            "Reason": "Entry Price must be a finite number and cannot be Boolean",
         }
 
     if entry_price <= 0:
@@ -92,7 +104,7 @@ def evaluate_stop_loss_price(
         }
 
     if not all(
-        isinstance(price, (int, float)) and price > 0
+        _is_finite_number(price) and price > 0
         for price in price_history
     ):
         return {

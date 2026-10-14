@@ -31,9 +31,27 @@ Safety:
 Wisdom Before Wealth.
 """
 
+import math
+
 from modules.nifty_option_paper_trade_coordinator import (
     create_qualified_paper_trade,
 )
+
+
+def _coerce_whole_quantity(value):
+    """Accept finite whole-number quantities, but reject booleans."""
+    if isinstance(value, bool):
+        return None
+
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+    if not math.isfinite(numeric) or not numeric.is_integer():
+        return None
+
+    return int(numeric)
 
 
 def _blocked(reason):
@@ -123,12 +141,10 @@ def create_v21_2_paper_trade(
             "Trade ID is required"
         )
 
-    try:
-        quantity = int(quantity)
-    except (TypeError, ValueError):
-
+    quantity = _coerce_whole_quantity(quantity)
+    if quantity is None:
         return _blocked(
-            "Quantity must be an integer"
+            "Quantity must be a finite whole number"
         )
 
     if quantity <= 0:

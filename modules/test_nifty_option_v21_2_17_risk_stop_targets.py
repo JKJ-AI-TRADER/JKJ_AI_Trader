@@ -139,6 +139,35 @@ def main():
         unified_observation_result,
     )
 
+    # Offline regression: invalid observations must be rejected safely.
+    import copy
+
+    for invalid_price in (
+        float("nan"),
+        float("inf"),
+        float("-inf"),
+        True,
+        False,
+    ):
+        invalid_input = copy.deepcopy(unified_observation_result)
+        invalid_input["Observations By Contract"][
+            observation_identity
+        ][0]["Current Price"] = invalid_price
+
+        rejected = evaluate_real_market_risk_stop_targets(
+            decision_entry_result,
+            invalid_input,
+        )
+
+        assert rejected["Results"][0]["Status"] == (
+            "RISK_STOP_TARGETS_REJECTED"
+        ), (repr(invalid_price), rejected)
+
+        assert rejected["Live Order"] is False
+        assert rejected["Paper Trade"] is False
+
+    print("Invalid observation regression cases: PASS")
+
     print()
     print("=" * 70)
     print("V21.2.17 OFFLINE RISK + STOP + TARGET TEST")

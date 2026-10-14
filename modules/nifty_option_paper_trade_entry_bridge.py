@@ -18,6 +18,81 @@ This module does NOT:
 Wisdom Before Wealth.
 """
 
+import math
+
+
+def _coerce_whole_quantity(value):
+    """Accept finite whole-number quantities, but reject booleans."""
+    if isinstance(value, bool):
+        return None
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(numeric) or not numeric.is_integer():
+        return None
+    return int(numeric)
+
+
+def _validate_price_structure(data):
+    """Validate entry, stop, targets and stated risk/reward ratios."""
+    required = [
+        "Trading Symbol", "Underlying", "Expiry", "Strike",
+        "Option Type", "Entry Price", "Stop Price",
+        "Target 1", "Target 2", "Target 3",
+        "Risk Reward 1", "Risk Reward 2", "Risk Reward 3",
+        "Entry Qualification", "Qualification Reason",
+    ]
+
+    for field in required:
+        if field not in data or data[field] is None:
+            return f"Missing required field: {field}"
+
+    numeric_fields = [
+        "Strike", "Entry Price", "Stop Price",
+        "Target 1", "Target 2", "Target 3",
+        "Risk Reward 1", "Risk Reward 2", "Risk Reward 3",
+    ]
+    values = {}
+
+    for field in numeric_fields:
+        value = data[field]
+        if isinstance(value, bool):
+            return f"{field} must be a finite number"
+        try:
+            value = float(value)
+        except (TypeError, ValueError, OverflowError):
+            return f"{field} must be a finite number"
+        if not math.isfinite(value):
+            return f"{field} must be a finite number"
+        values[field] = value
+
+    entry = values["Entry Price"]
+    stop = values["Stop Price"]
+    targets = [
+        values["Target 1"],
+        values["Target 2"],
+        values["Target 3"],
+    ]
+
+    if values["Strike"] <= 0 or entry <= 0 or stop <= 0:
+        return "Strike, entry price and stop price must be positive"
+
+    if stop >= entry:
+        return "Stop price must be below entry price"
+
+    if not (entry < targets[0] < targets[1] < targets[2]):
+        return "Targets must be above entry and strictly ascending"
+
+    risk = entry - stop
+    for index, target in enumerate(targets, start=1):
+        supplied = values[f"Risk Reward {index}"]
+        expected = round((target - entry) / risk, 2)
+        if supplied <= 0 or round(supplied, 2) != expected:
+            return f"Risk Reward {index} does not match the supplied prices"
+
+    return None
+
 
 # ---------------------------------------------------------
 # 1. Prepare V11 paper-trade entry
@@ -60,12 +135,11 @@ def prepare_paper_trade_entry(
     # Validate quantity
     # -----------------------------------------------------
 
-    try:
-        quantity = int(quantity)
-    except (TypeError, ValueError):
+    quantity = _coerce_whole_quantity(quantity)
+    if quantity is None:
         return {
             "Status": "REJECTED",
-            "Reason": "Quantity must be an integer",
+            "Reason": "Quantity must be a finite whole number",
         }
 
     if quantity <= 0:
@@ -82,6 +156,15 @@ def prepare_paper_trade_entry(
         return {
             "Status": "REJECTED",
             "Reason": "Trade ID is required",
+        }
+
+    validation_error = _validate_price_structure(
+        paper_trade_qualification
+    )
+    if validation_error:
+        return {
+            "Status": "REJECTED",
+            "Reason": validation_error,
         }
 
     # -----------------------------------------------------

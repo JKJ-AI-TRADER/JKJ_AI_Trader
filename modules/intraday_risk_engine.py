@@ -17,6 +17,19 @@ Capital protection comes before profit.
 """
 
 
+import math
+
+
+def _is_finite_number(value):
+    """Accept finite int/float inputs but reject booleans."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except (OverflowError, TypeError, ValueError):
+        return False
+
+
 def analyse_intraday_risk(
     entry_price,
     stop_loss,
@@ -38,6 +51,15 @@ def analyse_intraday_risk(
     # BASIC VALIDATION
     # -----------------------------------------
 
+    if not isinstance(trading_allowed, bool):
+        return {
+            "Trade Allowed": False,
+            "Risk Status": "INVALID INPUT",
+            "Risk Level": "HIGH",
+            "Reasons": ["Trading Allowed flag must be a Boolean."],
+            "Warnings": [],
+        }
+
     if not trading_allowed:
 
         return {
@@ -57,6 +79,30 @@ def analyse_intraday_risk(
             "Warnings": []
         }
 
+    numeric_values = {
+        "Entry Price": entry_price,
+        "Stop Loss": stop_loss,
+        "Target Price": target_price,
+        "Setup Score": setup_score,
+    }
+    invalid_fields = [
+        field
+        for field, value in numeric_values.items()
+        if not _is_finite_number(value)
+    ]
+
+    if invalid_fields:
+        return {
+            "Trade Allowed": False,
+            "Risk Status": "INVALID INPUT",
+            "Risk Level": "HIGH",
+            "Reasons": [
+                "Expected finite, non-Boolean numeric input(s): "
+                + ", ".join(invalid_fields)
+            ],
+            "Warnings": [],
+        }
+
     if entry_price <= 0:
 
         return {
@@ -72,6 +118,15 @@ def analyse_intraday_risk(
     # -----------------------------------------
     # CALCULATE RISK
     # -----------------------------------------
+
+    if stop_loss <= 0:
+        return {
+            "Trade Allowed": False,
+            "Risk Status": "INVALID STOP LOSS",
+            "Risk Level": "HIGH",
+            "Reasons": ["Stop loss must be greater than zero."],
+            "Warnings": [],
+        }
 
     risk_amount = entry_price - stop_loss
     reward_amount = target_price - entry_price
@@ -106,38 +161,44 @@ def analyse_intraday_risk(
     # PERCENTAGES
     # -----------------------------------------
 
-    risk_percentage = (
+    # Keep unrounded values for decisions; round only for reporting.
+    risk_percentage_raw = (
         risk_amount / entry_price
     ) * 100
 
-    reward_percentage = (
+    reward_percentage_raw = (
         reward_amount / entry_price
     ) * 100
 
-    risk_reward_ratio = (
+    risk_reward_ratio_raw = (
         reward_amount / risk_amount
     )
 
-    risk_percentage = round(
-        risk_percentage,
-        2
-    )
+    if not all(
+        math.isfinite(value)
+        for value in (
+            risk_percentage_raw,
+            reward_percentage_raw,
+            risk_reward_ratio_raw,
+        )
+    ):
+        return {
+            "Trade Allowed": False,
+            "Risk Status": "INVALID CALCULATION",
+            "Risk Level": "HIGH",
+            "Reasons": ["Calculated risk metrics are not finite."],
+            "Warnings": [],
+        }
 
-    reward_percentage = round(
-        reward_percentage,
-        2
-    )
-
-    risk_reward_ratio = round(
-        risk_reward_ratio,
-        2
-    )
+    risk_percentage = round(risk_percentage_raw, 2)
+    reward_percentage = round(reward_percentage_raw, 2)
+    risk_reward_ratio = round(risk_reward_ratio_raw, 2)
 
     # -----------------------------------------
     # RISK CLASSIFICATION
     # -----------------------------------------
 
-    if risk_percentage > 2:
+    if risk_percentage_raw > 2:
 
         risk_level = "HIGH"
 
@@ -146,7 +207,7 @@ def analyse_intraday_risk(
             "2% intraday limit."
         )
 
-    elif risk_percentage > 1:
+    elif risk_percentage_raw > 1:
 
         risk_level = "MEDIUM"
 
@@ -168,7 +229,7 @@ def analyse_intraday_risk(
     # RISK / REWARD EVALUATION
     # -----------------------------------------
 
-    if risk_reward_ratio < 1.5:
+    if risk_reward_ratio_raw < 1.5:
 
         warnings.append(
             "Risk-to-reward ratio is below the "
@@ -207,7 +268,7 @@ def analyse_intraday_risk(
 
         trade_allowed = False
 
-    if risk_reward_ratio < 1.5:
+    if risk_reward_ratio_raw < 1.5:
 
         trade_allowed = False
 

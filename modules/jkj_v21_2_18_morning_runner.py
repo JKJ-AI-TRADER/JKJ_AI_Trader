@@ -9,7 +9,7 @@ from modules.nifty_option_v21_2_18_daily_orchestrator import (
     run_v21_2_18_daily_orchestrator,
 )
 from modules.nifty_option_v21_2_18_baseline_store import (
-    BASELINE_FILE,
+    baseline_file_for_date,
     load_today_baseline,
 )
 from modules.nifty_option_v21_2_pre_market_controller import (
@@ -108,8 +108,15 @@ def validate_baseline_payload(payload, now):
     return True, "Baseline validation passed."
 
 
-def validate_stored_baseline(now, baseline_file=BASELINE_FILE):
-    path = Path(baseline_file)
+def validate_stored_baseline(now, baseline_file=None):
+    if baseline_file is not None:
+        path = Path(baseline_file)
+    else:
+        try:
+            path = baseline_file_for_date(now)
+        except (TypeError, ValueError):
+            return False, "Validation time must be timezone-aware."
+
     if not path.exists():
         return False, "Baseline file does not exist."
     try:
@@ -121,8 +128,8 @@ def validate_stored_baseline(now, baseline_file=BASELINE_FILE):
     if not valid:
         return False, reason
 
-    # The existing orchestrator must also be able to load the baseline.
-    if load_today_baseline() is None:
+    # The store must recognize the baseline from this same trading date.
+    if load_today_baseline(path=path, now=now) is None:
         return False, (
             "Existing baseline store does not recognize today's baseline."
         )
