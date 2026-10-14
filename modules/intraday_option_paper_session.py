@@ -36,12 +36,12 @@ This module does NOT:
 Wisdom Before Wealth.
 """
 
-from intraday_paper_trading import (
+from modules.intraday_paper_trading import (
     update_paper_price,
     process_paper_exit,
 )
 
-from intraday_option_paper_position_monitor import (
+from modules.intraday_option_paper_position_monitor import (
     monitor_option_paper_position,
 )
 

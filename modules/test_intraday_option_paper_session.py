@@ -1,5 +1,5 @@
-from intraday_paper_trading import open_paper_trade
-from intraday_option_paper_session import run_option_paper_session
+from modules.intraday_paper_trading import open_paper_trade
+from modules.intraday_option_paper_session import run_option_paper_session
 
 
 def test_1_healthy_session_remains_open():
@@ -193,62 +193,6 @@ def test_6_partial_exit_and_continuation():
     assert result["Gross P&L"] > 0
 
     print("TEST 6 PASSED")
-
-def test_7_partial_exits_then_final_target_exit():
-
-        trade = open_paper_trade(
-            trade_id="TEST-V11-007",
-            symbol="NIFTY26SEP23300CE",
-            instrument_type="OPTION",
-            entry_price=100.0,
-            quantity=75,
-            stop_loss=95.0,
-            target=120.0,
-            momentum_score=88,
-            entry_status="STRONG ENTRY CANDIDATE",
-            entry_reason="V11 full lifecycle test",
-            expiry="2026-09-15",
-            strike=23300,
-            option_type="CE",
-            underlying="NIFTY",
-        )
-
-        result = run_option_paper_session(
-            trade,
-            [
-                100.0,
-                110.0,
-                108.0,
-                106.0,
-                120.0,
-            ],
-            momentum_status="WEAK",
-            volume_status="DECREASING",
-            underlying_status="SUPPORTIVE",
-            structure_status="STRONG",
-        )
-
-        assert result["Status"] == "READY"
-
-        assert result["Session Status"] == "OPEN"
-
-        assert result["Final Quantity"] == 0
-
-        assert result["Gross P&L"] > 0
-
-        partial_exit_count = sum(
-            1
-            for event in result["Session Events"]
-            if event.get("Exit Result", {})
-            .get("Slicing Result", {})
-            .get("Slice Decision") == "PARTIAL EXIT"
-        )
-
-        assert partial_exit_count >= 1
-
-        assert result["Exit Reason"] == "TARGET REACHED"
-
-        print("TEST 7 PASSED")
 
 def test_7_partial_exits_then_final_target_exit():
 
