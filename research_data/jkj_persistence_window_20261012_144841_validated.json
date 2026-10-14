@@ -1,0 +1,100 @@
+{
+  "Schema": "JKJ_PERSISTENCE_WINDOW_V1",
+  "Trading Date": "2026-10-12",
+  "Symbol": "NIFTY26O1322400CE",
+  "Target Samples": 6,
+  "Target Interval Seconds": 13,
+  "Live Observations": [
+    {
+      "Time": "2026-10-12T14:48:47.127074+05:30",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 47.55,
+      "Open": 208.9,
+      "High": 288.25,
+      "Low": 43.6,
+      "Volume": 393962595,
+      "Quote Timestamp": "2026-10-12T14:48:46",
+      "Last Trade Time": "2026-10-12T14:48:45",
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "2026-10-12T14:49:00.121895+05:30",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 47.5,
+      "Open": 208.9,
+      "High": 288.25,
+      "Low": 43.6,
+      "Volume": 394084860,
+      "Quote Timestamp": "2026-10-12T14:48:59",
+      "Last Trade Time": "2026-10-12T14:48:59",
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "2026-10-12T14:49:13.119195+05:30",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 48.55,
+      "Open": 208.9,
+      "High": 288.25,
+      "Low": 43.6,
+      "Volume": 394236245,
+      "Quote Timestamp": "2026-10-12T14:49:12",
+      "Last Trade Time": "2026-10-12T14:49:12",
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "2026-10-12T14:49:26.125863+05:30",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 49.5,
+      "Open": 208.9,
+      "High": 288.25,
+      "Low": 43.6,
+      "Volume": 394405115,
+      "Quote Timestamp": "2026-10-12T14:49:25",
+      "Last Trade Time": "2026-10-12T14:49:24",
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "2026-10-12T14:49:39.120719+05:30",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 50.15,
+      "Open": 208.9,
+      "High": 288.25,
+      "Low": 43.6,
+      "Volume": 394823715,
+      "Quote Timestamp": "2026-10-12T14:49:38",
+      "Last Trade Time": "2026-10-12T14:49:37",
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "2026-10-12T14:49:52.128701+05:30",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 50.25,
+      "Open": 208.9,
+      "High": 288.25,
+      "Low": 43.6,
+      "Volume": 395201755,
+      "Quote Timestamp": "2026-10-12T14:49:51",
+      "Last Trade Time": "2026-10-12T14:49:51",
+      "Normalizer": "READY",
+      "Observer": "READY"
+    }
+  ],
+  "Capture Gaps Seconds": [
+    12.994821,
+    12.9973,
+    13.006668,
+    12.994856,
+    13.007982
+  ],
+  "Duration Seconds": 65.001627,
+  "Status": "COMPLETE",
+  "Trading Decision": false,
+  "Live Order": false,
+  "Paper Trade": false,
+  "Baseline Write": false
+}

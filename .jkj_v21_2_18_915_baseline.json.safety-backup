@@ -1,0 +1,438 @@
+{
+  "Trading Date": "2026-10-08",
+  "Baseline Type": "GENUINE_915",
+  "Baseline": {
+    "Status": "BASELINE_CAPTURE_COMPLETE",
+    "Baseline Type": "GENUINE_915",
+    "Baseline Time": "09:15",
+    "Captured At": "2026-10-08T09:15:04+05:30",
+    "NIFTY Spot": 22546.2,
+    "Expiry": "2026-10-13",
+    "Universe Count": 42,
+    "Baseline Count": 42,
+    "Baseline": [
+      {
+        "Trading Symbol": "NIFTY26O1322050CE",
+        "Option Type": "CE",
+        "Strike": 22050.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 559.55,
+        "Previous Close": 559.55
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322050PE",
+        "Option Type": "PE",
+        "Strike": 22050.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 18.35,
+        "Previous Close": 15.9
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322100CE",
+        "Option Type": "CE",
+        "Strike": 22100.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 440.6,
+        "Previous Close": 508.8
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322100PE",
+        "Option Type": "PE",
+        "Strike": 22100.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 23.2,
+        "Previous Close": 19.55
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322150CE",
+        "Option Type": "CE",
+        "Strike": 22150.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 465.9,
+        "Previous Close": 465.9
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322150PE",
+        "Option Type": "PE",
+        "Strike": 22150.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 29.55,
+        "Previous Close": 23.95
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322200CE",
+        "Option Type": "CE",
+        "Strike": 22200.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 355.75,
+        "Previous Close": 419.8
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322200PE",
+        "Option Type": "PE",
+        "Strike": 22200.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 37.4,
+        "Previous Close": 29.55
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322250CE",
+        "Option Type": "CE",
+        "Strike": 22250.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 314.0,
+        "Previous Close": 378.85
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322250PE",
+        "Option Type": "PE",
+        "Strike": 22250.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 46.45,
+        "Previous Close": 36.55
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322300CE",
+        "Option Type": "CE",
+        "Strike": 22300.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 276.7,
+        "Previous Close": 334.75
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322300PE",
+        "Option Type": "PE",
+        "Strike": 22300.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 57.8,
+        "Previous Close": 44.7
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322350CE",
+        "Option Type": "CE",
+        "Strike": 22350.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 240.35,
+        "Previous Close": 294.05
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322350PE",
+        "Option Type": "PE",
+        "Strike": 22350.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 71.8,
+        "Previous Close": 55.0
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322400CE",
+        "Option Type": "CE",
+        "Strike": 22400.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 206.55,
+        "Previous Close": 257.0
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322400PE",
+        "Option Type": "PE",
+        "Strike": 22400.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 87.9,
+        "Previous Close": 67.4
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322450CE",
+        "Option Type": "CE",
+        "Strike": 22450.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 176.6,
+        "Previous Close": 223.7
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322450PE",
+        "Option Type": "PE",
+        "Strike": 22450.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 107.0,
+        "Previous Close": 81.7
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322500CE",
+        "Option Type": "CE",
+        "Strike": 22500.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 146.4,
+        "Previous Close": 189.6
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322500PE",
+        "Option Type": "PE",
+        "Strike": 22500.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 129.25,
+        "Previous Close": 98.6
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322550CE",
+        "Option Type": "CE",
+        "Strike": 22550.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 121.45,
+        "Previous Close": 159.45
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322550PE",
+        "Option Type": "PE",
+        "Strike": 22550.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 155.2,
+        "Previous Close": 119.05
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322600CE",
+        "Option Type": "CE",
+        "Strike": 22600.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 100.05,
+        "Previous Close": 132.6
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322600PE",
+        "Option Type": "PE",
+        "Strike": 22600.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 183.05,
+        "Previous Close": 141.7
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322650CE",
+        "Option Type": "CE",
+        "Strike": 22650.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 82.1,
+        "Previous Close": 108.5
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322650PE",
+        "Option Type": "PE",
+        "Strike": 22650.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 212.05,
+        "Previous Close": 167.2
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322700CE",
+        "Option Type": "CE",
+        "Strike": 22700.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 65.7,
+        "Previous Close": 87.15
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322700PE",
+        "Option Type": "PE",
+        "Strike": 22700.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 246.7,
+        "Previous Close": 196.2
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322750CE",
+        "Option Type": "CE",
+        "Strike": 22750.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 52.35,
+        "Previous Close": 69.5
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322750PE",
+        "Option Type": "PE",
+        "Strike": 22750.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 283.3,
+        "Previous Close": 227.6
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322800CE",
+        "Option Type": "CE",
+        "Strike": 22800.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 41.1,
+        "Previous Close": 53.7
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322800PE",
+        "Option Type": "PE",
+        "Strike": 22800.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 319.95,
+        "Previous Close": 262.7
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322850CE",
+        "Option Type": "CE",
+        "Strike": 22850.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 31.1,
+        "Previous Close": 41.9
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322850PE",
+        "Option Type": "PE",
+        "Strike": 22850.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 362.75,
+        "Previous Close": 300.0
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322900CE",
+        "Option Type": "CE",
+        "Strike": 22900.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 23.55,
+        "Previous Close": 32.15
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322900PE",
+        "Option Type": "PE",
+        "Strike": 22900.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 403.25,
+        "Previous Close": 341.25
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322950CE",
+        "Option Type": "CE",
+        "Strike": 22950.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 18.05,
+        "Previous Close": 24.35
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322950PE",
+        "Option Type": "PE",
+        "Strike": 22950.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 449.2,
+        "Previous Close": 381.75
+      },
+      {
+        "Trading Symbol": "NIFTY26O1323000CE",
+        "Option Type": "CE",
+        "Strike": 23000.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 14.0,
+        "Previous Close": 18.65
+      },
+      {
+        "Trading Symbol": "NIFTY26O1323000PE",
+        "Option Type": "PE",
+        "Strike": 23000.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 495.35,
+        "Previous Close": 429.3
+      },
+      {
+        "Trading Symbol": "NIFTY26O1323050CE",
+        "Option Type": "CE",
+        "Strike": 23050.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 10.0,
+        "Previous Close": 13.8
+      },
+      {
+        "Trading Symbol": "NIFTY26O1323050PE",
+        "Option Type": "PE",
+        "Strike": 23050.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 471.55,
+        "Previous Close": 471.55
+      }
+    ],
+    "Live Order": false,
+    "Paper Trade": false
+  }
+}

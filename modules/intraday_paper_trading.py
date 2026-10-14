@@ -32,6 +32,8 @@ This module does NOT:
 Wisdom Before Wealth.
 """
 
+import math
+
 from modules.intraday_trade_logger import (
     create_trade_record,
     update_peak_price,
@@ -41,6 +43,17 @@ from modules.intraday_trade_logger import (
 from modules.intraday_position_slicing import (
     calculate_slice_plan,
 )
+
+
+def _coerce_finite_price(value):
+    """Return a finite numeric price or None; reject booleans."""
+    if isinstance(value, bool):
+        return None
+    try:
+        price = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return price if math.isfinite(price) else None
 
 
 # ---------------------------------------------------------
@@ -115,12 +128,11 @@ def update_paper_price(
             "Reason": "Trade is not open",
         }
 
-    try:
-        current_price = float(current_price)
-    except (TypeError, ValueError):
+    current_price = _coerce_finite_price(current_price)
+    if current_price is None:
         return {
             "Status": "ERROR",
-            "Reason": "Invalid current price",
+            "Reason": "Current price must be a finite non-Boolean number",
         }
 
     if current_price <= 0:
@@ -206,12 +218,11 @@ def process_paper_exit(
             "Reason": "Trade is not open",
         }
 
-    try:
-        current_price = float(current_price)
-    except (TypeError, ValueError):
+    current_price = _coerce_finite_price(current_price)
+    if current_price is None:
         return {
             "Status": "ERROR",
-            "Reason": "Invalid current price",
+            "Reason": "Current price must be a finite non-Boolean number",
         }
 
     if current_price <= 0:
@@ -220,11 +231,31 @@ def process_paper_exit(
             "Reason": "Current price must be greater than zero",
         }
 
-    # Update price / peak first.
-    update_paper_price(
+    # Save price-related state. If the sell is rejected later, restore
+    # these fields so the rejected operation has no partial side effects.
+    missing_price_state = object()
+    price_state_keys = (
+        "Current Price",
+        "Peak Price",
+        "Peak Profit %",
+    )
+    price_state_before = {
+        key: trade.get(key, missing_price_state)
+        for key in price_state_keys
+    }
+
+    # Update price / peak for slicing calculations.
+    update_result = update_paper_price(
         trade,
         current_price,
     )
+    if update_result.get("Status") != "UPDATED":
+        return {
+            "Status": "ERROR",
+            "Reason": update_result.get(
+                "Reason", "Current price update failed"
+            ),
+        }
 
     current_quantity = trade.get(
         "Current Quantity",
@@ -314,6 +345,13 @@ def process_paper_exit(
         timestamp=timestamp,
         reason=exit_signal,
     )
+
+    if sell_result.get("Status") != "RECORDED":
+        for key, value in price_state_before.items():
+            if value is missing_price_state:
+                trade.pop(key, None)
+            else:
+                trade[key] = value
 
     return {
         "Status": sell_result.get(

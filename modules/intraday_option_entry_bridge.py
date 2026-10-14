@@ -270,10 +270,36 @@ def evaluate_option_entry(
     # FINAL DECISION
     # ---------------------------------------------------------
 
-    if not entry_gate_result.get("Entry Allowed",False):
-    
-        final_decision = "NO TRADE"
+    risk_allowed = risk_result.get("Trade Allowed") is True
+    entry_allowed = entry_gate_result.get("Entry Allowed") is True
 
+    # Risk approval is mandatory; momentum and cost approval cannot override it.
+    final_reasons = [
+        "Option opportunity evaluated through cost, risk and entry-gate controls."
+    ]
+
+    if not risk_allowed:
+        risk_diagnostics = []
+        for key in ("Reasons", "Warnings"):
+            items = risk_result.get(key, [])
+            if isinstance(items, list):
+                risk_diagnostics.extend(str(item) for item in items)
+
+        if not risk_diagnostics:
+            risk_diagnostics = [
+                str(risk_result.get(
+                    "Risk Status",
+                    "Risk engine did not approve the candidate."
+                ))
+            ]
+
+        final_reasons.extend(
+            f"Risk engine: {reason}"
+            for reason in risk_diagnostics
+        )
+
+    if not risk_allowed or not entry_allowed:
+        final_decision = "NO TRADE"
     else:
         final_decision = opportunity_decision
 
@@ -303,8 +329,5 @@ def evaluate_option_entry(
         "Cost Result": cost_result,
         "Risk Result": risk_result,
         "Entry Gate Result": entry_gate_result,
-        "Reasons": [
-            "Option opportunity evaluated through "
-            "cost, risk and entry-gate controls."
-        ],
+        "Reasons": final_reasons,
     }

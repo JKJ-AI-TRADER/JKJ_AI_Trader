@@ -1,0 +1,45 @@
+{
+  "Schema": "JKJ_SHORT_WINDOW_PERSISTENCE_EVALUATION_V1",
+  "Source": "research_data/jkj_persistence_window_20261012_144841_validated.json",
+  "Minimum Samples": 5,
+  "Minimum Duration Seconds": 60,
+  "Maximum Gap Seconds": 15,
+  "Accepted Observations": 6,
+  "Rejected Observations": 0,
+  "Windows": [
+    {
+      "Symbol": "NIFTY26O1322400CE",
+      "Samples": 6,
+      "Start": "2026-10-12T14:48:47.127074+05:30",
+      "End": "2026-10-12T14:49:52.128701+05:30",
+      "Duration Seconds": 65.001627,
+      "Prices": [
+        47.55,
+        47.5,
+        48.55,
+        49.5,
+        50.15,
+        50.25
+      ],
+      "First Price": 47.55,
+      "Peak Price": 50.25,
+      "Final Price": 50.25,
+      "Net Change %": 5.6782,
+      "Peak Pullback %": 0.0,
+      "Maximum Peak Giveback %": 0.1052,
+      "Peak Timestamp": "2026-10-12T14:49:52.128701+05:30",
+      "Trough After Peak Price": 50.25,
+      "Trough Timestamp": "2026-10-12T14:49:52.128701+05:30",
+      "Peak-to-Trough Drawdown": 0.0,
+      "Peak-to-Trough Drawdown %": 0.0,
+      "Recovery from Trough %": 0.0,
+      "Giveback Recovered %": null,
+      "Status": "ELIGIBLE_FOR_PERSISTENCE_REVIEW",
+      "Trading Signal": null
+    }
+  ],
+  "Trading Decision": false,
+  "Live Order": false,
+  "Paper Trade": false,
+  "Baseline Write": false
+}

@@ -51,7 +51,7 @@ def normal_opportunity():
 # ---------------------------------------------------------
 
 print()
-print("TEST 1 — STRONG OPTION ENTRY")
+print("TEST 1 — EXCESSIVE RISK OVERRIDES STRONG MOMENTUM")
 print("-" * 55)
 
 result = evaluate_option_entry(
@@ -75,11 +75,14 @@ print("Risk Reward Ratio:", result["Risk Reward Ratio"])
 print("Momentum Score:", result["Momentum Score"])
 
 assert result["Status"] == "READY"
-assert result["Decision"] == "STRONG ENTRY CANDIDATE"
+assert result["Decision"] == "NO TRADE"
 assert result["Risk Amount"] == 5.0
 assert result["Reward Amount"] == 12.5
 assert result["Risk Reward Ratio"] == 2.5
 assert result["Momentum Score"] == 90
+assert result["Risk Result"]["Trade Allowed"] is False
+assert result["Risk Result"]["Risk Percentage"] == 5.0
+assert any("exceeds the preferred" in reason for reason in result["Reasons"])
 
 print("PASS")
 
@@ -100,7 +103,7 @@ result = evaluate_option_entry(
     ),
     option_type="CE",
     entry_price=100.00,
-    stop_loss_price=95.00,
+    stop_loss_price=99.00,
     target_price=110.00,
     quantity=75,
 )
@@ -111,7 +114,8 @@ print("Risk Reward Ratio:", result["Risk Reward Ratio"])
 
 assert result["Status"] == "READY"
 assert result["Decision"] == "ENTRY CANDIDATE"
-assert result["Risk Reward Ratio"] == 2.0
+assert result["Risk Reward Ratio"] == 10.0
+assert result["Risk Result"]["Trade Allowed"] is True
 
 print("PASS")
 
@@ -132,7 +136,7 @@ result = evaluate_option_entry(
     ),
     option_type="CE",
     entry_price=100.00,
-    stop_loss_price=95.00,
+    stop_loss_price=99.00,
     target_price=115.00,
     quantity=75,
 )

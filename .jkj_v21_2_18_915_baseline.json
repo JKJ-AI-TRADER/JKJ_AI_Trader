@@ -1,25 +1,65 @@
 {
-  "Trading Date": "2026-10-07",
+  "Trading Date": "2026-10-08",
   "Baseline Type": "GENUINE_915",
   "Baseline": {
     "Status": "BASELINE_CAPTURE_COMPLETE",
     "Baseline Type": "GENUINE_915",
     "Baseline Time": "09:15",
-    "Captured At": "2026-10-07T09:15:26+05:30",
-    "NIFTY Spot": 22645.2,
+    "Captured At": "2026-10-08T09:15:04+05:30",
+    "NIFTY Spot": 22546.2,
     "Expiry": "2026-10-13",
     "Universe Count": 42,
     "Baseline Count": 42,
     "Baseline": [
+      {
+        "Trading Symbol": "NIFTY26O1322050CE",
+        "Option Type": "CE",
+        "Strike": 22050.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 559.55,
+        "Previous Close": 559.55
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322050PE",
+        "Option Type": "PE",
+        "Strike": 22050.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 18.35,
+        "Previous Close": 15.9
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322100CE",
+        "Option Type": "CE",
+        "Strike": 22100.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 440.6,
+        "Previous Close": 508.8
+      },
+      {
+        "Trading Symbol": "NIFTY26O1322100PE",
+        "Option Type": "PE",
+        "Strike": 22100.0,
+        "Expiry": "2026-10-13",
+        "Baseline Time": "09:15",
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 23.2,
+        "Previous Close": 19.55
+      },
       {
         "Trading Symbol": "NIFTY26O1322150CE",
         "Option Type": "CE",
         "Strike": 22150.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 612.25,
-        "Previous Close": 612.25
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 465.9,
+        "Previous Close": 465.9
       },
       {
         "Trading Symbol": "NIFTY26O1322150PE",
@@ -27,9 +67,9 @@
         "Strike": 22150.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 28.35,
-        "Previous Close": 19.6
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 29.55,
+        "Previous Close": 23.95
       },
       {
         "Trading Symbol": "NIFTY26O1322200CE",
@@ -37,9 +77,9 @@
         "Strike": 22200.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 469.9,
-        "Previous Close": 569.2
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 355.75,
+        "Previous Close": 419.8
       },
       {
         "Trading Symbol": "NIFTY26O1322200PE",
@@ -47,9 +87,9 @@
         "Strike": 22200.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 33.6,
-        "Previous Close": 22.95
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 37.4,
+        "Previous Close": 29.55
       },
       {
         "Trading Symbol": "NIFTY26O1322250CE",
@@ -57,9 +97,9 @@
         "Strike": 22250.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 420.8,
-        "Previous Close": 522.1
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 314.0,
+        "Previous Close": 378.85
       },
       {
         "Trading Symbol": "NIFTY26O1322250PE",
@@ -67,9 +107,9 @@
         "Strike": 22250.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 40.25,
-        "Previous Close": 27.3
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 46.45,
+        "Previous Close": 36.55
       },
       {
         "Trading Symbol": "NIFTY26O1322300CE",
@@ -77,9 +117,9 @@
         "Strike": 22300.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 381.3,
-        "Previous Close": 477.2
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 276.7,
+        "Previous Close": 334.75
       },
       {
         "Trading Symbol": "NIFTY26O1322300PE",
@@ -87,9 +127,9 @@
         "Strike": 22300.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 48.6,
-        "Previous Close": 32.35
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 57.8,
+        "Previous Close": 44.7
       },
       {
         "Trading Symbol": "NIFTY26O1322350CE",
@@ -97,9 +137,9 @@
         "Strike": 22350.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 342.3,
-        "Previous Close": 434.3
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 240.35,
+        "Previous Close": 294.05
       },
       {
         "Trading Symbol": "NIFTY26O1322350PE",
@@ -107,9 +147,9 @@
         "Strike": 22350.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 58.4,
-        "Previous Close": 39.0
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 71.8,
+        "Previous Close": 55.0
       },
       {
         "Trading Symbol": "NIFTY26O1322400CE",
@@ -117,9 +157,9 @@
         "Strike": 22400.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 304.95,
-        "Previous Close": 391.9
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 206.55,
+        "Previous Close": 257.0
       },
       {
         "Trading Symbol": "NIFTY26O1322400PE",
@@ -127,9 +167,9 @@
         "Strike": 22400.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 69.55,
-        "Previous Close": 46.75
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 87.9,
+        "Previous Close": 67.4
       },
       {
         "Trading Symbol": "NIFTY26O1322450CE",
@@ -137,9 +177,9 @@
         "Strike": 22450.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 268.55,
-        "Previous Close": 352.1
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 176.6,
+        "Previous Close": 223.7
       },
       {
         "Trading Symbol": "NIFTY26O1322450PE",
@@ -147,9 +187,9 @@
         "Strike": 22450.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 82.4,
-        "Previous Close": 55.4
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 107.0,
+        "Previous Close": 81.7
       },
       {
         "Trading Symbol": "NIFTY26O1322500CE",
@@ -157,9 +197,9 @@
         "Strike": 22500.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 233.85,
-        "Previous Close": 312.3
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 146.4,
+        "Previous Close": 189.6
       },
       {
         "Trading Symbol": "NIFTY26O1322500PE",
@@ -167,9 +207,9 @@
         "Strike": 22500.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 98.1,
-        "Previous Close": 66.15
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 129.25,
+        "Previous Close": 98.6
       },
       {
         "Trading Symbol": "NIFTY26O1322550CE",
@@ -177,9 +217,9 @@
         "Strike": 22550.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 203.1,
-        "Previous Close": 274.9
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 121.45,
+        "Previous Close": 159.45
       },
       {
         "Trading Symbol": "NIFTY26O1322550PE",
@@ -187,9 +227,9 @@
         "Strike": 22550.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 116.35,
-        "Previous Close": 79.8
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 155.2,
+        "Previous Close": 119.05
       },
       {
         "Trading Symbol": "NIFTY26O1322600CE",
@@ -197,9 +237,9 @@
         "Strike": 22600.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 172.65,
-        "Previous Close": 240.05
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 100.05,
+        "Previous Close": 132.6
       },
       {
         "Trading Symbol": "NIFTY26O1322600PE",
@@ -207,9 +247,9 @@
         "Strike": 22600.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 137.75,
-        "Previous Close": 94.9
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 183.05,
+        "Previous Close": 141.7
       },
       {
         "Trading Symbol": "NIFTY26O1322650CE",
@@ -217,9 +257,9 @@
         "Strike": 22650.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 145.55,
-        "Previous Close": 208.25
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 82.1,
+        "Previous Close": 108.5
       },
       {
         "Trading Symbol": "NIFTY26O1322650PE",
@@ -227,9 +267,9 @@
         "Strike": 22650.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 161.6,
-        "Previous Close": 111.7
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 212.05,
+        "Previous Close": 167.2
       },
       {
         "Trading Symbol": "NIFTY26O1322700CE",
@@ -237,9 +277,9 @@
         "Strike": 22700.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 122.05,
-        "Previous Close": 178.0
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 65.7,
+        "Previous Close": 87.15
       },
       {
         "Trading Symbol": "NIFTY26O1322700PE",
@@ -247,9 +287,9 @@
         "Strike": 22700.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 187.4,
-        "Previous Close": 132.3
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 246.7,
+        "Previous Close": 196.2
       },
       {
         "Trading Symbol": "NIFTY26O1322750CE",
@@ -257,9 +297,9 @@
         "Strike": 22750.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 101.55,
-        "Previous Close": 151.15
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 52.35,
+        "Previous Close": 69.5
       },
       {
         "Trading Symbol": "NIFTY26O1322750PE",
@@ -267,9 +307,9 @@
         "Strike": 22750.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 216.2,
-        "Previous Close": 154.05
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 283.3,
+        "Previous Close": 227.6
       },
       {
         "Trading Symbol": "NIFTY26O1322800CE",
@@ -277,9 +317,9 @@
         "Strike": 22800.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 83.1,
-        "Previous Close": 125.75
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 41.1,
+        "Previous Close": 53.7
       },
       {
         "Trading Symbol": "NIFTY26O1322800PE",
@@ -287,9 +327,9 @@
         "Strike": 22800.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 248.25,
-        "Previous Close": 179.0
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 319.95,
+        "Previous Close": 262.7
       },
       {
         "Trading Symbol": "NIFTY26O1322850CE",
@@ -297,9 +337,9 @@
         "Strike": 22850.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 67.65,
-        "Previous Close": 104.3
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 31.1,
+        "Previous Close": 41.9
       },
       {
         "Trading Symbol": "NIFTY26O1322850PE",
@@ -307,9 +347,9 @@
         "Strike": 22850.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 281.9,
-        "Previous Close": 207.1
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 362.75,
+        "Previous Close": 300.0
       },
       {
         "Trading Symbol": "NIFTY26O1322900CE",
@@ -317,9 +357,9 @@
         "Strike": 22900.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 54.55,
-        "Previous Close": 84.6
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 23.55,
+        "Previous Close": 32.15
       },
       {
         "Trading Symbol": "NIFTY26O1322900PE",
@@ -327,9 +367,9 @@
         "Strike": 22900.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 319.3,
-        "Previous Close": 237.3
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 403.25,
+        "Previous Close": 341.25
       },
       {
         "Trading Symbol": "NIFTY26O1322950CE",
@@ -337,9 +377,9 @@
         "Strike": 22950.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 43.45,
-        "Previous Close": 68.05
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 18.05,
+        "Previous Close": 24.35
       },
       {
         "Trading Symbol": "NIFTY26O1322950PE",
@@ -347,9 +387,9 @@
         "Strike": 22950.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 357.7,
-        "Previous Close": 268.1
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 449.2,
+        "Previous Close": 381.75
       },
       {
         "Trading Symbol": "NIFTY26O1323000CE",
@@ -357,9 +397,9 @@
         "Strike": 23000.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 34.4,
-        "Previous Close": 54.0
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 14.0,
+        "Previous Close": 18.65
       },
       {
         "Trading Symbol": "NIFTY26O1323000PE",
@@ -367,9 +407,9 @@
         "Strike": 23000.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 400.2,
-        "Previous Close": 304.6
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 495.35,
+        "Previous Close": 429.3
       },
       {
         "Trading Symbol": "NIFTY26O1323050CE",
@@ -377,9 +417,9 @@
         "Strike": 23050.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 27.2,
-        "Previous Close": 42.4
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 10.0,
+        "Previous Close": 13.8
       },
       {
         "Trading Symbol": "NIFTY26O1323050PE",
@@ -387,49 +427,9 @@
         "Strike": 23050.0,
         "Expiry": "2026-10-13",
         "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 439.0,
-        "Previous Close": 343.7
-      },
-      {
-        "Trading Symbol": "NIFTY26O1323100CE",
-        "Option Type": "CE",
-        "Strike": 23100.0,
-        "Expiry": "2026-10-13",
-        "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 21.55,
-        "Previous Close": 32.75
-      },
-      {
-        "Trading Symbol": "NIFTY26O1323100PE",
-        "Option Type": "PE",
-        "Strike": 23100.0,
-        "Expiry": "2026-10-13",
-        "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 485.3,
-        "Previous Close": 383.1
-      },
-      {
-        "Trading Symbol": "NIFTY26O1323150CE",
-        "Option Type": "CE",
-        "Strike": 23150.0,
-        "Expiry": "2026-10-13",
-        "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 17.1,
-        "Previous Close": 25.45
-      },
-      {
-        "Trading Symbol": "NIFTY26O1323150PE",
-        "Option Type": "PE",
-        "Strike": 23150.0,
-        "Expiry": "2026-10-13",
-        "Baseline Time": "09:15",
-        "Captured At": "2026-10-07T09:15:26+05:30",
-        "9:15 Price": 425.95,
-        "Previous Close": 425.95
+        "Captured At": "2026-10-08T09:15:04+05:30",
+        "9:15 Price": 471.55,
+        "Previous Close": 471.55
       }
     ],
     "Live Order": false,

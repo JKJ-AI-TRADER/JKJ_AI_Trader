@@ -90,6 +90,23 @@ def test_invalid_input():
     assert result["Status"] == "REJECTED"
 
 
+def test_nonfinite_and_boolean_values_rejected():
+    bad_values = (float("nan"), float("inf"), float("-inf"), True, False)
+    for field in ("Entry Price", "Stop Price", "Stop Distance"):
+        for bad in bad_values:
+            data = build_stop_loss_data()
+            data[field] = bad
+            result = evaluate_targets(data)
+            assert result["Status"] == "REJECTED", (field, repr(bad))
+
+
+def test_inconsistent_stop_distance_rejected():
+    data = build_stop_loss_data()
+    data["Stop Distance"] = 5
+    result = evaluate_targets(data)
+    assert result["Status"] == "REJECTED"
+
+
 if __name__ == "__main__":
     test_targets()
     test_targets_are_increasing()
@@ -98,5 +115,7 @@ if __name__ == "__main__":
     test_invalid_stop_distance()
     test_missing_field()
     test_invalid_input()
+    test_nonfinite_and_boolean_values_rejected()
+    test_inconsistent_stop_distance_rejected()
 
     print("V14.4 Targets 1-3: PASS")

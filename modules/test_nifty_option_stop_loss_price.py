@@ -112,6 +112,22 @@ def test_missing_field():
     assert result["Status"] == "REJECTED"
 
 
+def test_nonfinite_and_boolean_entry_prices_rejected():
+    for bad in (float("nan"), float("inf"), float("-inf"), True, False):
+        result = evaluate_stop_loss_price(
+            build_stop_loss_context(), bad, [101, 103, 99]
+        )
+        assert result["Status"] == "REJECTED", repr(bad)
+
+
+def test_nonfinite_and_boolean_history_prices_rejected():
+    for bad in (float("nan"), float("inf"), float("-inf"), True, False):
+        result = evaluate_stop_loss_price(
+            build_stop_loss_context(), 105, [101, bad, 99]
+        )
+        assert result["Status"] == "REJECTED", repr(bad)
+
+
 if __name__ == "__main__":
     test_valid_stop_loss()
     test_stop_above_entry_rejected()
@@ -121,5 +137,7 @@ if __name__ == "__main__":
     test_invalid_price_history()
     test_invalid_input()
     test_missing_field()
+    test_nonfinite_and_boolean_entry_prices_rejected()
+    test_nonfinite_and_boolean_history_prices_rejected()
 
     print("V14.3 Stop-Loss Price: PASS")

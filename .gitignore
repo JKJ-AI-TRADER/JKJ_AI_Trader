@@ -6,3 +6,6 @@ __pycache__/
 *.py[cod]
 .kite_request_token
 .kite_session
+
+# JKJ AI Trader generated daily baseline files
+.jkj_v21_2_18_915_baseline_*.json

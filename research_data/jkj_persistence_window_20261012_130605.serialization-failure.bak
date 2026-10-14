@@ -1,0 +1,16 @@
+{
+  "Schema": "JKJ_PERSISTENCE_WINDOW_V1",
+  "Trading Date": "2026-10-12",
+  "Symbol": "NIFTY26O1322400CE",
+  "Target Samples": 5,
+  "Target Interval Seconds": 15,
+  "Live Observations": [
+    {
+      "Time": "2026-10-12T13:05:05+05:30",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 80.95,
+      "Open": 208.9,
+      "High": 288.25,
+      "Low": 69.45,
+      "Volume": 227914765,
+      "Quote Timestamp": 

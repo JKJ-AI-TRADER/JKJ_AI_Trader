@@ -25,6 +25,9 @@ Diagnostic principle:
     complete JKJ decision chain remains explainable.
 """
 
+import math
+
+
 from modules.nifty_option_entry_risk_context import (
     evaluate_entry_risk_context,
 )
@@ -40,6 +43,15 @@ from modules.nifty_option_stop_loss_price import (
 from modules.nifty_option_targets import (
     evaluate_targets,
 )
+
+
+def _is_finite_number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except (OverflowError, TypeError, ValueError):
+        return False
 
 
 def _base_contract_data(decision_item):
@@ -427,13 +439,10 @@ def evaluate_real_market_risk_stop_targets(
                 "Current Price"
             )
 
-            if not isinstance(
-                current_price,
-                (int, float),
-            ):
+            if not _is_finite_number(current_price):
                 invalid_observation = (
-                    "Observation Current Price "
-                    "must be numeric"
+                    "Observation Current Price must be "
+                    "a finite number and cannot be Boolean"
                 )
                 break
 

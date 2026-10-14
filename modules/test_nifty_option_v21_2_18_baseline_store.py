@@ -8,8 +8,11 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import patch
 
+import modules.nifty_option_v21_2_18_baseline_store as store
 from modules.nifty_option_v21_2_18_baseline_store import (
+    baseline_file_for_date,
     save_baseline,
     load_today_baseline,
 )
@@ -40,6 +43,14 @@ def valid_result():
         "Live Order": False,
         "Paper Trade": False,
     }
+
+
+def result_for_date(trading_date, capture_clock="09:15:04"):
+    captured_at = f"{trading_date}T{capture_clock}+05:30"
+    result = valid_result()
+    result["Captured At"] = captured_at
+    result["Baseline"][0]["Captured At"] = captured_at
+    return result
 
 
 class BaselineStoreTests(unittest.TestCase):
@@ -145,6 +156,59 @@ class BaselineStoreTests(unittest.TestCase):
 
         self.assertEqual(saved["Status"], "BASELINE_NOT_SAVED")
         self.assertEqual(self.path.read_bytes(), original_bytes)
+
+    def test_baseline_filename_uses_ist_trading_date(self):
+        utc_time = datetime.fromisoformat("2026-10-08T20:00:00+00:00")
+        dated_path = baseline_file_for_date(
+            utc_time,
+            base_path=self.path,
+        )
+        self.assertEqual(
+            dated_path.name,
+            "baseline_2026-10-09.json",
+        )
+
+        with self.assertRaises(ValueError):
+            baseline_file_for_date(
+                datetime(2026, 10, 9, 9, 15),
+                base_path=self.path,
+            )
+
+    def test_default_storage_keeps_each_trading_date_separate(self):
+        day_8 = datetime.fromisoformat("2026-10-08T09:15:00+05:30")
+        day_12 = datetime.fromisoformat("2026-10-12T09:15:00+05:30")
+        first = result_for_date("2026-10-08")
+        second = result_for_date("2026-10-12")
+
+        with patch.object(store, "BASELINE_FILE", self.path):
+            first_saved = save_baseline(first)
+            second_saved = save_baseline(second)
+
+            file_8 = baseline_file_for_date(day_8)
+            file_12 = baseline_file_for_date(day_12)
+
+            self.assertEqual(first_saved["Status"], "BASELINE_SAVED")
+            self.assertEqual(second_saved["Status"], "BASELINE_SAVED")
+            self.assertTrue(file_8.exists())
+            self.assertTrue(file_12.exists())
+            self.assertFalse(self.path.exists())
+
+            self.assertEqual(load_today_baseline(now=day_8), first)
+            self.assertEqual(load_today_baseline(now=day_12), second)
+            self.assertIsNone(
+                load_today_baseline(
+                    now=datetime.fromisoformat("2026-10-09T09:15:00+05:30")
+                )
+            )
+
+            original_day_8 = file_8.read_bytes()
+            replacement = result_for_date("2026-10-08", "09:15:10")
+            replacement["NIFTY Spot"] = 99999.0
+            refused = save_baseline(replacement)
+
+            self.assertEqual(refused["Status"], "BASELINE_NOT_SAVED")
+            self.assertEqual(file_8.read_bytes(), original_day_8)
+            self.assertEqual(load_today_baseline(now=day_8), first)
 
     def test_loader_rejects_wrong_trading_date(self):
         result = valid_result()

@@ -1,0 +1,128 @@
+"""
+JKJ AI Trader — V21.2.18 Morning Runner
+
+Purpose:
+    Start the existing daily orchestrator at a controlled time so
+    genuine 09:15 baseline capture is not accidentally missed.
+
+Safety:
+    - Never creates or backfills a synthetic baseline.
+    - Invokes the orchestrator at most once per runner execution.
+    - No live orders.
+    - No paper trades.
+"""
+
+from datetime import datetime, time, timedelta
+from zoneinfo import ZoneInfo
+import time as time_module
+
+from modules.nifty_option_v21_2_18_daily_orchestrator import (
+    run_v21_2_18_daily_orchestrator,
+)
+from modules.nifty_option_v21_2_18_baseline_store import (
+    load_today_baseline,
+)
+
+
+IST = ZoneInfo("Asia/Kolkata")
+CAPTURE_START = time(9, 14, 30)
+CAPTURE_END = time(9, 16, 0)
+PREFERRED_START = time(9, 15, 0)
+
+
+def get_runner_action(now):
+    """Pure timing decision, suitable for offline tests."""
+    if now.tzinfo is None:
+        raise ValueError("now must be timezone-aware")
+
+    now = now.astimezone(IST)
+    clock = now.time()
+
+    if clock > CAPTURE_END:
+        return "STOP_WINDOW_MISSED"
+
+    if clock < PREFERRED_START:
+        return "WAIT_FOR_PREFERRED_START"
+
+    return "RUN_ONCE"
+
+
+def run_morning_runner():
+    now = datetime.now(IST)
+    action = get_runner_action(now)
+
+    print("=" * 68)
+    print("JKJ V21.2.18 MORNING RUNNER")
+    print("=" * 68)
+    print("Current Time:", now.isoformat(timespec="seconds"))
+    print("Protected Window: 09:14:30–09:16:00 IST")
+    print("Preferred Start: 09:15:00 IST")
+    print("Live Order: False")
+    print("Paper Trade: False")
+
+    if action == "STOP_WINDOW_MISSED":
+        print("Status: BASELINE_WINDOW_MISSED")
+        print("Reason: Runner started after the protected capture window.")
+        print("Action: No orchestrator call; no baseline created.")
+        return {
+            "Status": "BASELINE_WINDOW_MISSED",
+            "Live Order": False,
+            "Paper Trade": False,
+        }
+
+    if action == "WAIT_FOR_PREFERRED_START":
+        target = now.replace(
+            hour=9, minute=15, second=0, microsecond=0
+        )
+        delay = max(0.0, (target - now).total_seconds())
+        print(f"Waiting {delay:.1f} seconds for preferred start.")
+        time_module.sleep(delay)
+
+    invocation_time = datetime.now(IST)
+
+    if not (CAPTURE_START <= invocation_time.time() <= CAPTURE_END):
+        print("Status: BASELINE_WINDOW_MISSED")
+        print("Reason: Protected window elapsed before invocation.")
+        return {
+            "Status": "BASELINE_WINDOW_MISSED",
+            "Live Order": False,
+            "Paper Trade": False,
+        }
+
+    print("Invoking daily orchestrator once...")
+    result = run_v21_2_18_daily_orchestrator(
+        window_seconds=60,
+        interval_seconds=15,
+    )
+
+    baseline = load_today_baseline()
+    baseline_is_genuine = (
+        baseline is not None
+        and baseline.get("Status") == "BASELINE_CAPTURE_COMPLETE"
+        and baseline.get("Baseline Type") == "GENUINE_915"
+        and baseline.get("Baseline Count", 0) > 0
+        and baseline.get("Captured At") not in (None, "", "TEST_ONLY")
+    )
+
+    status = (
+        "BASELINE_CONFIRMED"
+        if baseline_is_genuine
+        else "BASELINE_NOT_CONFIRMED"
+    )
+
+    print("Orchestrator Status:", result.get("Status"))
+    print("Baseline Status:", result.get("Baseline Status"))
+    print("Runner Result:", status)
+    print("Live Order: False")
+    print("Paper Trade: False")
+
+    return {
+        "Status": status,
+        "Orchestrator Result": result,
+        "Live Order": False,
+        "Paper Trade": False,
+    }
+
+
+if __name__ == "__main__":
+    run_morning_runner()

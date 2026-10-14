@@ -18,6 +18,22 @@ Wisdom Before Wealth.
 """
 
 from datetime import datetime
+import math
+
+
+def _coerce_whole_quantity(value):
+    """Accept only finite, whole-number quantities; reject booleans."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(numeric) or not numeric.is_integer():
+        return None
+    return int(numeric)
 
 
 # ---------------------------------------------------------
@@ -59,12 +75,11 @@ def create_trade_record(
             "Reason": "Symbol is required",
         }
 
-    try:
-        quantity = int(quantity)
-    except (TypeError, ValueError):
+    quantity = _coerce_whole_quantity(quantity)
+    if quantity is None:
         return {
             "Status": "ERROR",
-            "Reason": "Quantity must be numeric",
+            "Reason": "Quantity must be a finite whole number",
         }
 
     if quantity <= 0:
@@ -73,12 +88,24 @@ def create_trade_record(
             "Reason": "Quantity must be greater than zero",
         }
 
+    if isinstance(entry_price, bool):
+        return {
+            "Status": "ERROR",
+            "Reason": "Entry price cannot be Boolean",
+        }
+
     try:
         entry_price = float(entry_price)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return {
             "Status": "ERROR",
             "Reason": "Entry price must be numeric",
+        }
+
+    if not math.isfinite(entry_price):
+        return {
+            "Status": "ERROR",
+            "Reason": "Entry price must be finite",
         }
 
     if entry_price <= 0:
@@ -144,12 +171,15 @@ def update_peak_price(trade, current_price):
     if not isinstance(trade, dict):
         return trade
 
-    try:
-        current_price = float(current_price)
-    except (TypeError, ValueError):
+    if isinstance(current_price, bool):
         return trade
 
-    if current_price <= 0:
+    try:
+        current_price = float(current_price)
+    except (TypeError, ValueError, OverflowError):
+        return trade
+
+    if not math.isfinite(current_price) or current_price <= 0:
         return trade
 
     peak_price = trade.get("Peak Price", trade.get("Entry Price", 0))
@@ -260,22 +290,62 @@ def record_sell_event(
             "Reason": "Invalid trade record",
         }
 
+    if trade.get("Status") != "OPEN":
+        return {
+            "Status": "ERROR",
+            "Reason": "Trade is not open",
+        }
+
+    if not isinstance(trade.get("Exit Events"), list):
+        return {
+            "Status": "ERROR",
+            "Reason": "Invalid exit-event history",
+        }
+
+    quantity = _coerce_whole_quantity(quantity)
+    if quantity is None:
+        return {
+            "Status": "ERROR",
+            "Reason": "Sell quantity must be a finite whole number",
+        }
+
+    raw_financial_values = (
+        price,
+        gross_pnl,
+        costs,
+        slippage,
+        trade.get("Entry Price"),
+    )
+    if any(isinstance(value, bool) for value in raw_financial_values):
+        return {
+            "Status": "ERROR",
+            "Reason": "Financial values cannot be Boolean",
+        }
+
     try:
         price = float(price)
-        quantity = int(quantity)
         gross_pnl = float(gross_pnl)
         costs = float(costs)
         slippage = float(slippage)
-    except (TypeError, ValueError):
+        entry_price = float(trade.get("Entry Price"))
+    except (TypeError, ValueError, OverflowError):
         return {
             "Status": "ERROR",
             "Reason": "Invalid numeric input",
         }
 
-    if price <= 0:
+    if not all(math.isfinite(value) for value in (
+        price, gross_pnl, costs, slippage, entry_price
+    )):
         return {
             "Status": "ERROR",
-            "Reason": "Sell price must be greater than zero",
+            "Reason": "Financial values must be finite",
+        }
+
+    if price <= 0 or entry_price <= 0:
+        return {
+            "Status": "ERROR",
+            "Reason": "Entry and sell prices must be greater than zero",
         }
 
     if quantity <= 0:
@@ -284,7 +354,32 @@ def record_sell_event(
             "Reason": "Sell quantity must be greater than zero",
         }
 
+    if costs < 0 or slippage < 0:
+        return {
+            "Status": "ERROR",
+            "Reason": "Costs and slippage cannot be negative",
+        }
+
+    expected_gross_pnl = round(
+        (price - entry_price) * quantity,
+        2,
+    )
+    if round(gross_pnl, 2) != expected_gross_pnl:
+        return {
+            "Status": "ERROR",
+            "Reason": "Gross P&L does not match entry price, sell price and quantity",
+        }
+
     current_quantity = trade.get("Current Quantity", 0)
+    if (
+        isinstance(current_quantity, bool)
+        or not isinstance(current_quantity, int)
+        or current_quantity <= 0
+    ):
+        return {
+            "Status": "ERROR",
+            "Reason": "Current position quantity is invalid",
+        }
 
     if quantity > current_quantity:
         return {

@@ -1,0 +1,79 @@
+{
+  "Schema": "JKJ_TWO_WINDOW_COMPARISON_V1",
+  "Captures": [
+    {
+      "Source": "research_data/jkj_persistence_window_20261012_144841_validated.json",
+      "Window": {
+        "Symbol": "NIFTY26O1322400CE",
+        "Samples": 6,
+        "Start": "2026-10-12T14:48:47.127074+05:30",
+        "End": "2026-10-12T14:49:52.128701+05:30",
+        "Duration Seconds": 65.001627,
+        "Prices": [
+          47.55,
+          47.5,
+          48.55,
+          49.5,
+          50.15,
+          50.25
+        ],
+        "First Price": 47.55,
+        "Peak Price": 50.25,
+        "Final Price": 50.25,
+        "Net Change %": 5.6782,
+        "Peak Pullback %": 0.0,
+        "Maximum Peak Giveback %": 0.1052,
+        "Peak Timestamp": "2026-10-12T14:49:52.128701+05:30",
+        "Trough After Peak Price": 50.25,
+        "Trough Timestamp": "2026-10-12T14:49:52.128701+05:30",
+        "Peak-to-Trough Drawdown": 0.0,
+        "Peak-to-Trough Drawdown %": 0.0,
+        "Recovery from Trough %": 0.0,
+        "Giveback Recovered %": null,
+        "Status": "ELIGIBLE_FOR_PERSISTENCE_REVIEW",
+        "Trading Signal": null
+      }
+    },
+    {
+      "Source": "research_data/jkj_persistence_window_20261012_151027_validated.json",
+      "Window": {
+        "Symbol": "NIFTY26O1322400CE",
+        "Samples": 6,
+        "Start": "2026-10-12T15:10:30.760868+05:30",
+        "End": "2026-10-12T15:11:35.758489+05:30",
+        "Duration Seconds": 64.997621,
+        "Prices": [
+          42.85,
+          43.4,
+          44.15,
+          44.95,
+          45,
+          44.55
+        ],
+        "First Price": 42.85,
+        "Peak Price": 45,
+        "Final Price": 44.55,
+        "Net Change %": 3.9673,
+        "Peak Pullback %": -1.0,
+        "Maximum Peak Giveback %": 1.0,
+        "Peak Timestamp": "2026-10-12T15:11:22.756539+05:30",
+        "Trough After Peak Price": 44.55,
+        "Trough Timestamp": "2026-10-12T15:11:35.758489+05:30",
+        "Peak-to-Trough Drawdown": 0.45,
+        "Peak-to-Trough Drawdown %": 1.0,
+        "Recovery from Trough %": 0.0,
+        "Giveback Recovered %": 0.0,
+        "Status": "ELIGIBLE_FOR_PERSISTENCE_REVIEW",
+        "Trading Signal": null
+      }
+    }
+  ],
+  "Between Capture Gap Seconds": 1238.632167,
+  "Boundary Price Change %": -14.7264,
+  "Continuous Between Captures": false,
+  "Interpretation": "Both windows are eligible for further persistence review. Capture A ends at its peak; Capture B records a 1% peak-to-final pullback. The intervening path is unknown. Not a trading signal.",
+  "Trading Decision": false,
+  "Live Order": false,
+  "Paper Trade": false,
+  "Baseline Write": false
+}

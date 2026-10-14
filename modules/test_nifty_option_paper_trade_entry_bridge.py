@@ -135,6 +135,61 @@ def test_invalid_qualification():
     print("Invalid Qualification: PASS")
 
 
+def test_fractional_boolean_and_nonfinite_quantities():
+    for quantity in (1.5, True, float("nan"), float("inf")):
+        result = prepare_paper_trade_entry(
+            paper_trade_qualification=make_qualification(),
+            quantity=quantity,
+            trade_id="JKJ-V15-006",
+        )
+        assert result["Status"] == "REJECTED", (
+            f"Quantity should be rejected: {quantity!r}"
+        )
+
+    print("Fractional/Boolean/Non-finite Quantity: PASS")
+
+
+def test_invalid_entry_stop_target_relationships():
+    cases = [
+        ("non-finite entry", "Entry Price", float("nan")),
+        ("zero entry", "Entry Price", 0),
+        ("stop equals entry", "Stop Price", 103.0),
+        ("stop above entry", "Stop Price", 104.0),
+        ("target below entry", "Target 1", 102.0),
+        ("target equals entry", "Target 1", 103.0),
+        ("targets not ascending", "Target 2", 105.0),
+        ("third target too low", "Target 3", 111.0),
+    ]
+
+    for name, field, value in cases:
+        with_entry = make_qualification()
+        with_entry[field] = value
+        result = prepare_paper_trade_entry(
+            paper_trade_qualification=with_entry,
+            quantity=75,
+            trade_id="JKJ-V15-007",
+        )
+        assert result["Status"] == "REJECTED", (
+            f"Invalid setup should be rejected: {name}"
+        )
+
+    print("Invalid Entry/Stop/Target Relationships: PASS")
+
+
+def test_risk_reward_must_match_prices():
+    data = make_qualification()
+    data["Risk Reward 1"] = 99.0
+
+    result = prepare_paper_trade_entry(
+        paper_trade_qualification=data,
+        quantity=75,
+        trade_id="JKJ-V15-008",
+    )
+
+    assert result["Status"] == "REJECTED"
+    print("Risk/Reward Consistency: PASS")
+
+
 if __name__ == "__main__":
 
     test_permitted_setup()
@@ -142,6 +197,9 @@ if __name__ == "__main__":
     test_invalid_quantity()
     test_missing_trade_id()
     test_invalid_qualification()
+    test_fractional_boolean_and_nonfinite_quantities()
+    test_invalid_entry_stop_target_relationships()
+    test_risk_reward_must_match_prices()
 
     print()
     print(

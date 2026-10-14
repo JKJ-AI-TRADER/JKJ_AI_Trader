@@ -1,0 +1,128 @@
+"""Offline-only short-window persistence research. No trading actions."""
+
+import json
+import math
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+IST = ZoneInfo("Asia/Kolkata")
+SOURCE = Path("research_data/jkj_live_option_observations_20261012.json")
+MIN_SAMPLES = 5
+MIN_DURATION_SECONDS = 60
+MAX_GAP_SECONDS = 15
+
+
+def _timestamp(record, trading_date):
+    raw = record.get("Timestamp") or record.get("Time")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    raw = raw.strip().removesuffix(" IST")
+    try:
+        if len(raw) <= 8 and ":" in raw:
+            raw = f"{trading_date}T{raw}"
+        value = datetime.fromisoformat(raw)
+        return value.replace(tzinfo=IST) if value.tzinfo is None else value.astimezone(IST)
+    except ValueError:
+        return None
+
+
+def _price(value):
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+        and value > 0
+    )
+
+
+def _metrics(window):
+    prices = [row["Price"] for row in window]
+    first, final, peak = prices[0], prices[-1], max(prices)
+    duration = (window[-1]["Time"] - window[0]["Time"]).total_seconds()
+    running_peak = prices[0]
+    max_giveback = 0.0
+
+    for price in prices:
+        running_peak = max(running_peak, price)
+        max_giveback = max(max_giveback, (running_peak - price) / running_peak * 100)
+
+    eligible = len(window) >= MIN_SAMPLES and duration >= MIN_DURATION_SECONDS
+    return {
+        "Symbol": window[0]["Symbol"],
+        "Samples": len(window),
+        "Start": window[0]["Time"].isoformat(),
+        "End": window[-1]["Time"].isoformat(),
+        "Duration Seconds": duration,
+        "Prices": prices,
+        "First Price": first,
+        "Peak Price": peak,
+        "Final Price": final,
+        "Net Change %": round((final / first - 1) * 100, 4),
+        "Peak Pullback %": round((final / peak - 1) * 100, 4),
+        "Maximum Peak Giveback %": round(max_giveback, 4),
+        "Status": "ELIGIBLE_FOR_PERSISTENCE_REVIEW" if eligible else "INSUFFICIENT_SAMPLE",
+        "Trading Signal": None,
+    }
+
+
+def evaluate_log(data):
+    trading_date = data.get("Trading Date")
+    records = []
+    rejected = 0
+
+    for item in data.get("Live Observations", []):
+        if not isinstance(item, dict) or not _price(item.get("Price")):
+            rejected += 1
+            continue
+        stamp = _timestamp(item, trading_date)
+        symbol = item.get("Symbol")
+        if stamp is None or not isinstance(symbol, str) or not symbol.strip():
+            rejected += 1
+            continue
+        records.append({"Time": stamp, "Symbol": symbol, "Price": item["Price"]})
+
+    records.sort(key=lambda row: row["Time"])
+    windows_by_symbol = {}
+
+    for row in records:
+        symbol_windows = windows_by_symbol.setdefault(row["Symbol"], [])
+        if (
+            not symbol_windows
+            or (
+                row["Time"] - symbol_windows[-1][-1]["Time"]
+            ).total_seconds() > MAX_GAP_SECONDS
+        ):
+            symbol_windows.append([])
+        symbol_windows[-1].append(row)
+
+    windows = [
+        window
+        for symbol_windows in windows_by_symbol.values()
+        for window in symbol_windows
+    ]
+    windows.sort(key=lambda window: window[0]["Time"])
+
+    return {
+        "Schema": "JKJ_SHORT_WINDOW_PERSISTENCE_EVALUATION_V1",
+        "Source": str(SOURCE),
+        "Minimum Samples": MIN_SAMPLES,
+        "Minimum Duration Seconds": MIN_DURATION_SECONDS,
+        "Maximum Gap Seconds": MAX_GAP_SECONDS,
+        "Accepted Observations": len(records),
+        "Rejected Observations": rejected,
+        "Windows": [_metrics(window) for window in windows],
+        "Trading Decision": False,
+        "Live Order": False,
+        "Paper Trade": False,
+        "Baseline Write": False,
+    }
+
+
+def main():
+    data = json.loads(SOURCE.read_text(encoding="utf-8"))
+    print(json.dumps(evaluate_log(data), indent=2))
+
+
+if __name__ == "__main__":
+    main()

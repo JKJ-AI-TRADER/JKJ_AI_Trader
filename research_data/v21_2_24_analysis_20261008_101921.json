@@ -1,0 +1,15 @@
+{
+  "Status": "MOVEMENT_PEAK_GIVEBACK_ANALYSIS_COMPLETE",
+  "Observation Status": "ONE_HOUR_OBSERVATION_COMPLETE",
+  "Duration Minutes": 60,
+  "Interval Seconds": 60,
+  "Candidate Count": 0,
+  "Candidates": [],
+  "Outcome Counts": {},
+  "Research Purpose": "Measure persistence, extension, peak, giveback and reversal characteristics.",
+  "Trading Decision": false,
+  "Live Order": false,
+  "Paper Trade": false,
+  "BUY": false,
+  "SELL": false
+}

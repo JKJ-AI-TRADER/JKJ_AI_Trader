@@ -1,0 +1,78 @@
+{
+  "Schema": "JKJ_LIVE_OPTION_OBSERVATION_LOG_V1",
+  "Trading Date": "2026-10-12",
+  "Live Order": false,
+  "Paper Trade": false,
+  "Baseline Write": false,
+  "Live Observations": [
+    {
+      "Time": "12:21:04 IST",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 80.75,
+      "Spot": 22383.6,
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "12:26:10 IST",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 81.1,
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "12:26:15 IST",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 81.25,
+      "Change": 0.15,
+      "Normalizer": "READY",
+      "Observer": "READY"
+    },
+    {
+      "Time": "12:26:20 IST",
+      "Symbol": "NIFTY26O1322400CE",
+      "Price": 80.7,
+      "Change": -0.55,
+      "Net Change from First": -0.4,
+      "Normalizer": "READY",
+      "Observer": "READY"
+    }
+  ],
+  "Watchlist From Screenshots": [
+    {
+      "Contract": "NIFTY 13 Oct 23050 CE",
+      "Price": 2.65,
+      "Change %": -38.37
+    },
+    {
+      "Contract": "NIFTY 13 Oct 23050 PE",
+      "Price": 695.0,
+      "Change %": 41.49
+    },
+    {
+      "Contract": "NIFTY 19 Oct 22300 PE",
+      "Price": 145.2,
+      "Change %": 68.15
+    },
+    {
+      "Contract": "NIFTY 19 Oct 23000 PE",
+      "Price": 609.2,
+      "Change %": 36.13
+    },
+    {
+      "Contract": "NIFTY Oct 22500 PE",
+      "Price": 300.6,
+      "Change %": 43.89
+    },
+    {
+      "Contract": "NIFTY Oct 25000 PE",
+      "Price": 2562.5,
+      "Change %": 7.72
+    },
+    {
+      "Contract": "NIFTY Oct 20500 CE",
+      "Price": 1915.0,
+      "Change %": -9.44
+    }
+  ]
+}

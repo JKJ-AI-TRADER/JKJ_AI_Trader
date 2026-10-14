@@ -15,6 +15,37 @@ Important:
 Wisdom Before Wealth.
 """
 
+import math
+
+
+def _coerce_whole_quantity(value):
+    """Return a finite whole quantity, rejecting booleans and fractions."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        try:
+            return value if math.isfinite(value) else None
+        except OverflowError:
+            return None
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(numeric) or not numeric.is_integer():
+        return None
+    return int(numeric)
+
+
+def _coerce_finite_number(value):
+    """Return a finite number, rejecting booleans and conversion overflow."""
+    if isinstance(value, bool):
+        return None
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return numeric if math.isfinite(numeric) else None
+
 
 def calculate_slice_plan(
     total_quantity,
@@ -79,17 +110,29 @@ def calculate_slice_plan(
     if entry_price is None or current_price is None:
         return _no_trade_result("Invalid price")
 
+    total_quantity = _coerce_whole_quantity(total_quantity)
+    current_quantity = _coerce_whole_quantity(current_quantity)
+    entry_price = _coerce_finite_number(entry_price)
+    current_price = _coerce_finite_number(current_price)
+
     if peak_price is None:
         peak_price = current_price
+    else:
+        peak_price = _coerce_finite_number(peak_price)
 
-    try:
-        total_quantity = int(total_quantity)
-        current_quantity = int(current_quantity)
-        entry_price = float(entry_price)
-        current_price = float(current_price)
-        peak_price = float(peak_price)
-    except (TypeError, ValueError):
-        return _no_trade_result("Invalid numeric input")
+    if total_quantity is None or current_quantity is None:
+        return _no_trade_result(
+            "Quantities must be finite whole numbers and cannot be Boolean"
+        )
+
+    if (
+        entry_price is None
+        or current_price is None
+        or peak_price is None
+    ):
+        return _no_trade_result(
+            "Prices must be finite numbers and cannot be Boolean"
+        )
 
     if total_quantity <= 0:
         return _no_trade_result("Total quantity must be greater than zero")
@@ -102,7 +145,7 @@ def calculate_slice_plan(
             "Current quantity cannot exceed total quantity"
         )
 
-    if entry_price <= 0 or current_price <= 0:
+    if entry_price <= 0 or current_price <= 0 or peak_price <= 0:
         return _no_trade_result("Price must be greater than zero")
 
     # ---------------------------------------------------------

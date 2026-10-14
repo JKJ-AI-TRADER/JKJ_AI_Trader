@@ -1,0 +1,19 @@
+{
+  "Schema": "JKJ_PERSISTENCE_ANALYSIS_V1",
+  "Samples": 3,
+  "Prices": [
+    81.1,
+    81.25,
+    80.7
+  ],
+  "First Price": 81.1,
+  "Peak Price": 81.25,
+  "Final Price": 80.7,
+  "Rise to Peak %": 0.185,
+  "Peak Pullback %": -0.677,
+  "Net Change %": -0.493,
+  "Interpretation": "Brief rise followed by pullback; insufficient samples to qualify persistence.",
+  "Trading Decision": false,
+  "Live Order": false,
+  "Paper Trade": false
+}

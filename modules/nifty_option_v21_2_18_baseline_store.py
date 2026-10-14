@@ -24,6 +24,24 @@ def _now_ist() -> datetime:
     return datetime.now(IST)
 
 
+def baseline_file_for_date(
+    trading_date: Optional[datetime] = None,
+    base_path: Optional[Path] = None,
+) -> Path:
+    """Return a separate baseline filename for one timezone-aware IST date."""
+    target = _now_ist() if trading_date is None else trading_date
+    if (
+        not isinstance(target, datetime)
+        or target.tzinfo is None
+        or target.utcoffset() is None
+    ):
+        raise ValueError("trading_date must be a timezone-aware datetime.")
+
+    date_key = target.astimezone(IST).date().isoformat()
+    source = Path(base_path) if base_path is not None else BASELINE_FILE
+    return source.with_name(f"{source.stem}_{date_key}{source.suffix}")
+
+
 def _parse_valid_capture(result: Dict[str, Any]) -> Optional[datetime]:
     if result.get("Status") != "BASELINE_CAPTURE_COMPLETE":
         return None
@@ -73,7 +91,7 @@ def _parse_valid_capture(result: Dict[str, Any]) -> Optional[datetime]:
 
 def save_baseline(
     result: Dict[str, Any],
-    path: Path = BASELINE_FILE,
+    path: Optional[Path] = None,
 ) -> Dict[str, Any]:
     """Validate before writing; rejected input never overwrites a file."""
     captured = _parse_valid_capture(result)
@@ -94,8 +112,12 @@ def save_baseline(
         "Baseline": result,
     }
 
-    destination = Path(path)
-    # Preserve the first saved baseline; never silently replace it.
+    # Default writes are date-specific. Explicit paths remain available
+    # for controlled offline tests and deliberate file handling.
+    destination = (
+        Path(path) if path is not None else baseline_file_for_date(captured)
+    )
+    # Preserve the first saved baseline for this date; never replace it.
     if destination.exists():
         return {
             "Status": "BASELINE_NOT_SAVED",
@@ -127,11 +149,22 @@ def save_baseline(
 
 
 def load_today_baseline(
-    path: Path = BASELINE_FILE,
+    path: Optional[Path] = None,
     now: Optional[datetime] = None,
 ) -> Optional[Dict[str, Any]]:
-    """Load only a valid genuine baseline belonging to today's IST date."""
-    destination = Path(path)
+    """Load only a valid genuine baseline from today's date-specific IST file."""
+    current = now or _now_ist()
+    if (
+        not isinstance(current, datetime)
+        or current.tzinfo is None
+        or current.utcoffset() is None
+    ):
+        return None
+
+    today = current.astimezone(IST).date().isoformat()
+    destination = (
+        Path(path) if path is not None else baseline_file_for_date(current)
+    )
     if not destination.exists():
         return None
 
@@ -139,11 +172,6 @@ def load_today_baseline(
         payload = json.loads(destination.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError, UnicodeDecodeError):
         return None
-
-    current = now or _now_ist()
-    if current.tzinfo is None or current.utcoffset() is None:
-        return None
-    today = current.astimezone(IST).date().isoformat()
 
     if payload.get("Trading Date") != today:
         return None
